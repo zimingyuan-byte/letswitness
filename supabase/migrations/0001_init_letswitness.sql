@@ -135,7 +135,7 @@ create policy "profiles are publicly readable"
   for select
   using (true);
 
-create policy "users can manage their own profile"
+create policy "users can manage their own profile" 
   on public.letswitness_profiles
   for all
   using (auth.uid() = id)
