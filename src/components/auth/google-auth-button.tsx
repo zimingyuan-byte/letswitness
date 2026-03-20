@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Icons } from '@/components/Icons'
+import { siteConfig } from '@/config'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
 
 interface GoogleAuthButtonProps {
@@ -23,7 +24,10 @@ export function GoogleAuthButton({ className, nextPath = '/' }: GoogleAuthButton
 
     setIsLoading(true)
 
-    const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`
+    const redirectBaseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
+      siteConfig.url.replace(/\/$/, '')
+    const redirectTo = `${redirectBaseUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

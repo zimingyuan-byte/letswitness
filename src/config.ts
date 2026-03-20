@@ -2,7 +2,7 @@ export const siteConfig = {
   name: 'LetsWitness',
   description:
     'Track public predictions, preserve evidence, and let the community witness whether they come true.',
-  url: 'https://letswitness.com',
+  url: 'https://www.letswitness.com',
   navigation: [
     { href: '/', label: 'Home' },
     { href: '/explore', label: 'Explore' },
