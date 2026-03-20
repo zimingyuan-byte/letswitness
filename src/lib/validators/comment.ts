@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
-export const CommentValidator = z.object({
+export const createCommentSchema = z.object({
   postId: z.string(),
-  text: z.string(),
-  replyToId: z.string().optional()
+  content: z.string().trim().min(1).max(1000),
+  parentId: z.string().optional(),
 })
 
-export type CommentRequest = z.infer<typeof CommentValidator>
+export type CreateCommentInput = z.infer<typeof createCommentSchema>

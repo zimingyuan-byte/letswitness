@@ -1,0 +1,96 @@
+import type { ViewerProfile, WitnessPost } from '@/lib/domain'
+
+export const mockViewer: ViewerProfile = {
+  id: 'viewer-demo',
+  email: 'demo@letswitness.com',
+  username: 'witnessdemo',
+  avatarUrl: null,
+  displayName: 'Witness Demo',
+}
+
+export const mockPosts: WitnessPost[] = [
+  {
+    id: 'atlantic-ai-power',
+    title: 'Atlantic Capital claims its AI fund will outperform the S&P 500 by 40% in 2026',
+    description:
+      'A hedge fund partner said in a televised interview that the firm’s AI-focused strategy would beat the S&P 500 by at least 40% before the end of 2026. The post captures the quote, context, and follow-up reporting links for later verification.',
+    sourceName: 'Atlantic Capital',
+    status: 'pending',
+    credibilityScore: 82,
+    commentCount: 14,
+    createdAt: '2026-03-01T12:30:00.000Z',
+    tags: ['finance', 'ai', 'markets'],
+    author: {
+      id: 'author-1',
+      username: 'marketwatcher',
+      displayName: 'Market Watcher',
+      avatarUrl: null,
+    },
+    verificationEvents: [
+      {
+        id: 'evt-1',
+        type: 'time_point',
+        title: 'Time point verification',
+        description: 'Check performance relative to the S&P 500 on 2026-12-31.',
+        targetDate: '2026-12-31',
+        status: 'waiting',
+      },
+    ],
+  },
+  {
+    id: 'election-border-policy',
+    title: 'Campaign spokesperson predicts the emergency border order will be signed in the first 100 days',
+    description:
+      'The statement was made during a Sunday political talk show. This entry stores the video clip and context links, then waits for either the executive order to happen or the deadline to pass.',
+    sourceName: 'Northshore Policy PAC',
+    status: 'verifying',
+    credibilityScore: 68,
+    commentCount: 27,
+    createdAt: '2026-02-10T09:15:00.000Z',
+    tags: ['politics', 'policy'],
+    author: {
+      id: 'author-2',
+      username: 'civicledger',
+      displayName: 'Civic Ledger',
+      avatarUrl: null,
+    },
+    verificationEvents: [
+      {
+        id: 'evt-2',
+        type: 'event_trigger',
+        title: 'Event trigger verification',
+        description: 'Validate when the executive order is signed or officially rejected.',
+        deadline: '2026-05-01',
+        status: 'triggered',
+      },
+    ],
+  },
+  {
+    id: 'chip-factory-launch',
+    title: 'CEO says the Ohio chip factory will ship its first commercial wafers this year',
+    description:
+      'The prediction comes from a keynote at a manufacturing summit. The post includes the video timestamp, transcript excerpt, and analyst coverage to support later review.',
+    sourceName: 'Vector Foundry',
+    status: 'partially_fulfilled',
+    credibilityScore: 91,
+    commentCount: 9,
+    createdAt: '2025-11-18T18:40:00.000Z',
+    tags: ['technology', 'manufacturing'],
+    author: {
+      id: 'author-3',
+      username: 'signalarchive',
+      displayName: 'Signal Archive',
+      avatarUrl: null,
+    },
+    verificationEvents: [
+      {
+        id: 'evt-3',
+        type: 'time_point',
+        title: 'Year-end shipment check',
+        description: 'Confirm whether commercial wafers shipped before year end.',
+        targetDate: '2025-12-31',
+        status: 'resolved',
+      },
+    ],
+  },
+]

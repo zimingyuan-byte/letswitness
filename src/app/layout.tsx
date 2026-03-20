@@ -3,22 +3,21 @@ import { cn } from '@/lib/utils'
 import { Inter } from 'next/font/google'
 import Providers from '@/components/Providers'
 import { Toaster } from '@/components/ui/Toaster'
+import { siteConfig } from '@/config'
 
 import '@/styles/globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Breadit',
-  description: 'A Reddit clone built with Next.js and TypeScript.',
+  title: siteConfig.name,
+  description: siteConfig.description,
 }
 
 export default function RootLayout({
   children,
-  authModal,
 }: {
   children: React.ReactNode
-  authModal: React.ReactNode
 }) {
   return (
     <html
@@ -27,13 +26,10 @@ export default function RootLayout({
         'bg-white text-slate-900 antialiased light',
         inter.className
       )}>
-      <body className='min-h-screen pt-12 bg-slate-50 antialiased'>
+      <body className='min-h-screen bg-slate-50 antialiased'>
         <Providers>
-          {/* @ts-expect-error Server Component */}
           <Navbar />
-          {authModal}
-
-          <div className='container max-w-7xl mx-auto h-full pt-12'>
+          <div className='container mx-auto max-w-7xl py-8'>
             {children}
           </div>
         </Providers>

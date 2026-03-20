@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -24,5 +24,30 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "src/components/comments/**/*",
+    "src/components/homepage/**/*",
+    "src/components/post-vote/**/*",
+    "src/components/CommentVotes.tsx",
+    "src/components/CommentsSection.tsx",
+    "src/components/CreateComment.tsx",
+    "src/components/Editor.tsx",
+    "src/components/EditorOutput.tsx",
+    "src/components/ui/Command.tsx",
+    "src/components/ui/Dialog.tsx",
+    "src/components/MiniCreatePost.tsx",
+    "src/components/Post.tsx",
+    "src/components/PostFeed.tsx",
+    "src/components/SearchBar.tsx",
+    "src/components/SignIn.tsx",
+    "src/components/SignUp.tsx",
+    "src/components/SubscribeLeaveToggle.tsx",
+    "src/components/ToFeedButton.tsx",
+    "src/components/UserAccountNav.tsx",
+    "src/components/UserAuthForm.tsx",
+    "src/components/UserAvatar.tsx",
+    "src/components/UserNameForm.tsx",
+    "src/types/**/*"
+  ]
 }

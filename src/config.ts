@@ -1,2 +1,11 @@
-// 2 to demonstrate infinite scroll, should be higher in production
-export const INFINITE_SCROLL_PAGINATION_RESULTS = 2
+export const siteConfig = {
+  name: 'LetsWitness',
+  description:
+    'Track public predictions, preserve evidence, and let the community witness whether they come true.',
+  url: 'https://letswitness.com',
+  navigation: [
+    { href: '/', label: 'Home' },
+    { href: '/explore', label: 'Explore' },
+    { href: '/post/create', label: 'Create prediction' },
+  ],
+}
