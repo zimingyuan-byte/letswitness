@@ -21,6 +21,23 @@ export function VerificationCard({ event }: VerificationCardProps) {
         <p>{event.description}</p>
         {event.targetDate ? <p>Target date: {event.targetDate}</p> : null}
         {event.deadline ? <p>Deadline: {event.deadline}</p> : null}
+        {event.triggeredAt ? <p>Triggered: {event.triggeredAt}</p> : null}
+        {event.evidenceUrl ? (
+          <p>
+            Evidence:{' '}
+            <a
+              className='font-medium text-zinc-900 underline'
+              href={event.evidenceUrl}
+              rel='noreferrer'
+              target='_blank'>
+              Open link
+            </a>
+          </p>
+        ) : null}
+        {event.type === 'event_trigger' ? (
+          <p>{event.confirmCount} trigger confirmations</p>
+        ) : null}
+        <p>{event.votes.totalVotes} verification votes</p>
         <p>Status: {event.status}</p>
       </CardContent>
     </Card>

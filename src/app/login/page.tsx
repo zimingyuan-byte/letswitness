@@ -1,6 +1,15 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
+
+export const metadata: Metadata = {
+  title: 'Sign In',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 interface LoginPageProps {
   searchParams?: Promise<{

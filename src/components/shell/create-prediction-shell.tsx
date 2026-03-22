@@ -61,8 +61,19 @@ export function CreatePredictionShell({ errorMessage }: CreatePredictionShellPro
                 Separate tags with commas. They will be normalized into URL-friendly slugs.
               </p>
             </div>
-            <div className='rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground'>
-              You can add the source details now and expand supporting evidence over time.
+            <div className='space-y-2'>
+              <Label htmlFor='mediaFiles'>Evidence media</Label>
+              <Input
+                accept='image/*,audio/*,video/*'
+                id='mediaFiles'
+                multiple
+                name='mediaFiles'
+                type='file'
+              />
+              <p className='text-xs text-muted-foreground'>
+                Up to 5 files total. Images up to 10MB, audio up to 50MB, and video up to
+                200MB.
+              </p>
             </div>
             <div className='space-y-4 rounded-lg border border-border p-4'>
               <div className='space-y-2'>

@@ -1,12 +1,63 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { PostCard } from '@/components/feed/post-card'
+import { siteConfig } from '@/config'
 import { getPostsByUsername, getProfileByUsername } from '@/lib/data/posts'
 
 interface UserPageProps {
   params: Promise<{
     username: string
   }>
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>
+}): Promise<Metadata> {
+  const { username } = await params
+  const profile = await getProfileByUsername(username)
+
+  if (!profile?.username) {
+    return {
+      title: 'Contributor Not Found',
+      description: 'The requested contributor profile could not be found on LetsWitness.',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    }
+  }
+
+  const displayName = profile.displayName ?? `@${profile.username}`
+  const description = `${displayName} publishes and tracks public prediction records on LetsWitness. Browse their prediction archive and verification history.`
+
+  return {
+    title: `${displayName} | Prediction Contributor`,
+    description,
+    keywords: [
+      ...siteConfig.keywords,
+      profile.username,
+      'prediction contributor',
+      'prediction archive',
+      'verification history',
+    ],
+    alternates: {
+      canonical: `/user/${profile.username}`,
+    },
+    openGraph: {
+      title: `${displayName} | Prediction Contributor`,
+      description,
+      url: `${siteConfig.url}/user/${profile.username}`,
+      type: 'profile',
+    },
+    twitter: {
+      card: 'summary',
+      title: `${displayName} | Prediction Contributor`,
+      description,
+    },
+  }
 }
 
 export default async function UserPage({ params }: UserPageProps) {

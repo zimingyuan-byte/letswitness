@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { getViewerNotifications } from '@/lib/data/notifications'
 import { getViewerProfile } from '@/lib/data/posts'
 import { siteConfig } from '@/config'
 import { GoogleAuthButton } from '@/components/auth/google-auth-button'
@@ -8,7 +9,10 @@ import { Icons } from './Icons'
 import { buttonVariants } from './ui/Button'
 
 const Navbar = async () => {
-  const viewer = await getViewerProfile()
+  const [viewer, notifications] = await Promise.all([
+    getViewerProfile(),
+    getViewerNotifications(),
+  ])
 
   return (
     <header className='sticky top-0 z-30 border-b border-border bg-white/90 backdrop-blur'>
@@ -43,7 +47,11 @@ const Navbar = async () => {
             New post
           </Link>
           {viewer ? (
-            <UserMenu viewer={viewer} />
+            <UserMenu
+              notifications={notifications.items}
+              unreadCount={notifications.unreadCount}
+              viewer={viewer}
+            />
           ) : (
             <GoogleAuthButton className='h-10 px-4' />
           )}

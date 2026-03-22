@@ -1,10 +1,19 @@
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 import { completeProfileAction } from '@/app/onboarding/actions'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { getViewerProfile } from '@/lib/data/posts'
+
+export const metadata: Metadata = {
+  title: 'Complete Profile',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 interface OnboardingPageProps {
   searchParams?: Promise<{

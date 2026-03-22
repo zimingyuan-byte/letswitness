@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { LogOut, PlusSquare, UserCircle2 } from 'lucide-react'
+import { Bell, LogOut, PlusSquare, UserCircle2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar'
 import {
   DropdownMenu,
@@ -14,13 +14,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/DropdownMenu'
 import { createBrowserSupabaseClient } from '@/lib/supabase/client'
-import type { ViewerProfile } from '@/lib/domain'
+import type { NotificationItem, ViewerProfile } from '@/lib/domain'
+import { formatTimeToNow } from '@/lib/utils'
 
 interface UserMenuProps {
   viewer: ViewerProfile
+  notifications: NotificationItem[]
+  unreadCount: number
 }
 
-export function UserMenu({ viewer }: UserMenuProps) {
+export function UserMenu({ viewer, notifications, unreadCount }: UserMenuProps) {
   const router = useRouter()
   const [isSigningOut, setIsSigningOut] = useState(false)
 
@@ -46,18 +49,46 @@ export function UserMenu({ viewer }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className='rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'>
-        <Avatar className='h-9 w-9 border border-border'>
-          <AvatarImage alt={viewer.username ?? 'Viewer avatar'} src={viewer.avatarUrl ?? undefined} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+        <div className='relative'>
+          <Avatar className='h-9 w-9 border border-border'>
+            <AvatarImage alt={viewer.username ?? 'Viewer avatar'} src={viewer.avatarUrl ?? undefined} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          {unreadCount ? (
+            <span className='absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-zinc-900 px-1.5 text-[10px] font-semibold text-white'>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          ) : null}
+        </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-64'>
+      <DropdownMenuContent align='end' className='w-72'>
         <DropdownMenuLabel className='space-y-1'>
           <div className='font-medium'>{viewer.displayName ?? viewer.username ?? 'Signed in'}</div>
           <div className='text-xs text-muted-foreground'>
             @{viewer.username ?? 'finish-profile'}
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className='space-y-2 px-2 py-1.5'>
+          <div className='flex items-center gap-2 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+            <Bell className='h-3.5 w-3.5' />
+            Notifications
+          </div>
+          {notifications.length ? (
+            <div className='space-y-2 px-2 pb-1'>
+              {notifications.map((notification) => (
+                <div key={notification.id} className='rounded-md bg-zinc-50 px-3 py-2'>
+                  <p className='text-xs font-medium text-zinc-900'>{notification.message}</p>
+                  <p className='mt-1 text-[11px] text-muted-foreground'>
+                    {formatTimeToNow(new Date(notification.createdAt))}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className='px-2 pb-1 text-xs text-muted-foreground'>No notifications yet.</p>
+          )}
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href={viewer.username ? `/user/${viewer.username}` : '/onboarding'}>

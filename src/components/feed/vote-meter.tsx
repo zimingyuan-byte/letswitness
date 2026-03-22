@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils'
 
 interface VoteMeterProps {
   score: number
+  totalVotes?: number
 }
 
 function getMeterTone(score: number) {
@@ -17,7 +18,7 @@ function getMeterTone(score: number) {
   return 'bg-rose-500'
 }
 
-export function VoteMeter({ score }: VoteMeterProps) {
+export function VoteMeter({ score, totalVotes }: VoteMeterProps) {
   const clamped = Math.max(0, Math.min(100, score))
 
   return (
@@ -32,7 +33,12 @@ export function VoteMeter({ score }: VoteMeterProps) {
           style={{ width: `${clamped}%` }}
         />
       </div>
-      <div className='text-sm font-medium'>{clamped}% worth verifying</div>
+      <div className='space-y-1'>
+        <div className='text-sm font-medium'>{clamped}% worth verifying</div>
+        {typeof totalVotes === 'number' ? (
+          <div className='text-xs text-muted-foreground'>{totalVotes} total credibility votes</div>
+        ) : null}
+      </div>
     </div>
   )
 }

@@ -3,6 +3,13 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import {
+  getMediaByteLimit,
+  getMediaTypeFromFile,
+  LETSWITNESS_MEDIA_BUCKET,
+  LETSWITNESS_MEDIA_LIMITS,
+  sanitizeStorageName,
+} from '@/lib/supabase/storage'
 import { LETSWITNESS_TABLES } from '@/lib/supabase/tables'
 import { createPostSchema, postTagSchema } from '@/lib/validators/post'
 import {
@@ -21,6 +28,12 @@ function normalizeTags(rawValue: FormDataEntryValue | null) {
   const uniqueTags = [...new Set(raw.split(',').map((tag) => tag.trim()).filter(Boolean))]
 
   return uniqueTags.map((tag) => tag.toLowerCase().replace(/\s+/g, '-'))
+}
+
+function getValidFiles(formData: FormData) {
+  return formData
+    .getAll('mediaFiles')
+    .filter((value): value is File => value instanceof File && value.size > 0)
 }
 
 export async function createPredictionAction(formData: FormData) {
@@ -89,6 +102,35 @@ export async function createPredictionAction(formData: FormData) {
 
   if (!verificationInput.success) {
     redirect('/post/create?error=invalid-event')
+  }
+
+  const files = getValidFiles(formData)
+
+  if (files.length > LETSWITNESS_MEDIA_LIMITS.maxFiles) {
+    redirect('/post/create?error=invalid-media')
+  }
+
+  const mediaPayload = files.map((file) => {
+    const mediaType = getMediaTypeFromFile(file)
+
+    if (!mediaType) {
+      return null
+    }
+
+    const maxBytes = getMediaByteLimit(mediaType)
+
+    if (file.size > maxBytes) {
+      return null
+    }
+
+    return {
+      file,
+      mediaType,
+    }
+  })
+
+  if (mediaPayload.some((item) => !item)) {
+    redirect('/post/create?error=invalid-media')
   }
 
   const { data: post, error: postError } = await supabase
@@ -169,6 +211,51 @@ export async function createPredictionAction(formData: FormData) {
     if (verificationError) {
       throw verificationError
     }
+
+    if (mediaPayload.length) {
+      const uploadedMedia = []
+
+      for (const [index, item] of mediaPayload.entries()) {
+        if (!item) {
+          continue
+        }
+
+        const storagePath = `${profile.id}/${createdPostId}/${Date.now()}-${index}-${sanitizeStorageName(item.file.name)}`
+        const { error: uploadError } = await supabase.storage
+          .from(LETSWITNESS_MEDIA_BUCKET)
+          .upload(storagePath, item.file, {
+            cacheControl: '3600',
+            contentType: item.file.type,
+            upsert: false,
+          })
+
+        if (uploadError) {
+          throw uploadError
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from(LETSWITNESS_MEDIA_BUCKET).getPublicUrl(storagePath)
+
+        uploadedMedia.push({
+          post_id: createdPostId,
+          media_type: item.mediaType,
+          storage_path: storagePath,
+          public_url: publicUrl,
+          file_size: item.file.size,
+        })
+      }
+
+      if (uploadedMedia.length) {
+        const { error: mediaError } = await supabase
+          .from(LETSWITNESS_TABLES.postMedia)
+          .insert(uploadedMedia)
+
+        if (mediaError) {
+          throw mediaError
+        }
+      }
+    }
   } catch {
     await supabase.from(LETSWITNESS_TABLES.posts).delete().eq('id', createdPostId)
     redirect('/post/create?error=create-related-records-failed')
@@ -176,6 +263,7 @@ export async function createPredictionAction(formData: FormData) {
 
   revalidatePath('/')
   revalidatePath('/explore')
+  revalidatePath('/search')
   revalidatePath(`/post/${createdPostId}`)
   revalidatePath(`/user/${profile.username}`)
 

@@ -1,9 +1,26 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { ArrowRight, CalendarClock, ShieldCheck, Sparkles } from 'lucide-react'
 import { PostCard } from '@/components/feed/post-card'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { siteConfig } from '@/config'
 import { getHomePosts, getViewerProfile } from '@/lib/data/posts'
+
+export const metadata: Metadata = {
+  title: 'Prediction Tracking and Verification Platform',
+  description:
+    'LetsWitness is a prediction tracking platform where people archive public predictions, preserve evidence, and witness verification over time.',
+  keywords: [
+    ...siteConfig.keywords,
+    'prediction tracking platform',
+    'track public claims',
+    'public prediction verification',
+  ],
+  alternates: {
+    canonical: '/',
+  },
+}
 
 export default async function Home() {
   const [posts, viewer] = await Promise.all([getHomePosts(), getViewerProfile()])
@@ -16,12 +33,12 @@ export default async function Home() {
             <div className='inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium'>
               Public prediction archive
             </div>
-            <CardTitle className='text-4xl tracking-tight'>
-              Record a public prediction now. Let the community witness the outcome later.
-            </CardTitle>
+            <h1 className='text-4xl font-semibold tracking-tight'>
+              Track public predictions. Preserve the evidence. Witness the verification.
+            </h1>
             <CardDescription className='max-w-2xl text-sm text-zinc-300'>
-              Capture quotes, claims, and forecasts from people or organizations, then follow
-              whether they hold up over time.
+              LetsWitness is a public prediction tracking archive for quotes, claims, and
+              forecasts from people, organizations, and institutions.
             </CardDescription>
           </CardHeader>
           <CardContent className='flex flex-wrap items-center gap-3'>
@@ -148,6 +165,45 @@ export default async function Home() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      <section className='grid gap-4 lg:grid-cols-2'>
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-xl'>Prediction tracking with context</CardTitle>
+            <CardDescription>
+              Strong records make prediction verification clearer for readers and search.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-3 text-sm text-muted-foreground'>
+            <p>
+              LetsWitness helps people track predictions made by politicians, founders,
+              investors, commentators, and public institutions.
+            </p>
+            <p>
+              Each record centers on the original prediction, the source, the timing, and the
+              evidence required for fair verification.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-xl'>Witness verification over time</CardTitle>
+            <CardDescription>
+              A prediction matters most when people can revisit it later.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='space-y-3 text-sm text-muted-foreground'>
+            <p>
+              The goal is not only to archive a prediction, but to witness whether it came
+              true, failed, expired, or remained disputed.
+            </p>
+            <p>
+              By combining evidence, verification events, and community review, LetsWitness
+              creates a structured public prediction verification record.
+            </p>
+          </CardContent>
+        </Card>
       </section>
     </div>
   )
