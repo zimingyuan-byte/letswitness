@@ -1,0 +1,21 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/posts/[id]/route": "app/api/posts/[id]/route.js",
+  "/api/posts/route": "app/api/posts/route.js",
+  "/api/profiles/[username]/route": "app/api/profiles/[username]/route.js",
+  "/auth/callback/route": "app/auth/callback/route.js",
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
+  "/robots.txt/route": "app/robots.txt/route.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js",
+  "/apple-icon/route": "app/apple-icon/route.js",
+  "/icon/route": "app/icon/route.js",
+  "/post/[id]/page": "app/post/[id]/page.js",
+  "/search/page": "app/search/page.js",
+  "/user/[username]/page": "app/user/[username]/page.js",
+  "/login/page": "app/login/page.js",
+  "/onboarding/page": "app/onboarding/page.js",
+  "/explore/page": "app/explore/page.js",
+  "/page": "app/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/post/create/page": "app/post/create/page.js"
+}

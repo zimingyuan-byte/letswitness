@@ -41,9 +41,15 @@ export function UserMenu({ viewer, notifications, unreadCount }: UserMenuProps) 
     }
 
     setIsSigningOut(true)
-    await supabase.auth.signOut()
-    router.refresh()
-    router.push('/')
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      setIsSigningOut(false)
+      router.push('/login')
+      return
+    }
+
+    window.location.assign('/')
   }
 
   return (

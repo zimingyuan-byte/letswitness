@@ -87,6 +87,7 @@ export interface WitnessPost {
   title: string
   description: string
   sourceName: string
+  sourceUrl?: string | null
   status: PostStatus
   credibilityScore: number
   credibility: CredibilityVoteSummary

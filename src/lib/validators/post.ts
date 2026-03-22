@@ -20,7 +20,14 @@ export const createPostSchema = z.object({
   title: z.string().trim().min(8).max(120),
   description: z.string().trim().min(30).max(5000),
   sourceName: z.string().trim().min(2).max(120),
-  tags: z.array(postTagSchema).max(5).default([]),
+  sourceUrl: z
+    .string()
+    .trim()
+    .max(500)
+    .refine((value) => !value || /^https?:\/\/.+/i.test(value), {
+      message: 'Source link must start with http:// or https://.',
+    }),
+  tags: z.array(postTagSchema).min(1).max(5).default([]),
 })
 
 export const postSupplementSchema = z.object({

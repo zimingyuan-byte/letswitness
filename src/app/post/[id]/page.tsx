@@ -119,8 +119,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
             <div className='flex items-start justify-between gap-4'>
               <div>
                 <p className='text-sm text-muted-foreground'>
-                  Source: {post.sourceName} · @{post.author.username} ·{' '}
-                  {formatTimeToNow(new Date(post.createdAt))}
+                  @{post.author.username} · {formatTimeToNow(new Date(post.createdAt))}
                 </p>
                 <h1 className='mt-2 text-3xl font-semibold tracking-tight'>{post.title}</h1>
               </div>
@@ -141,7 +140,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
           </CardContent>
         </Card>
 
-        <MediaGallery media={post.media} />
+        <MediaGallery media={post.media} sourceName={post.sourceName} sourceUrl={post.sourceUrl} />
 
         <Card>
           <CardHeader>

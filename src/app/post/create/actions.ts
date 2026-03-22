@@ -13,10 +13,19 @@ import {
 import { LETSWITNESS_TABLES } from '@/lib/supabase/tables'
 import { createPostSchema, postTagSchema } from '@/lib/validators/post'
 import {
-  eventTriggerVerificationSchema,
   timePointVerificationSchema,
-  verificationEventTypeSchema,
 } from '@/lib/validators/verification'
+
+type CreatePredictionField =
+  | 'title'
+  | 'sourceName'
+  | 'sourceUrl'
+  | 'description'
+  | 'tags'
+  | 'verificationStandards'
+  | 'verificationDeadline'
+
+const DEFAULT_VERIFICATION_TITLE = 'Verification Deadline'
 
 function normalizeTags(rawValue: FormDataEntryValue | null) {
   const raw = typeof rawValue === 'string' ? rawValue : ''
@@ -36,22 +45,116 @@ function getValidFiles(formData: FormData) {
     .filter((value): value is File => value instanceof File && value.size > 0)
 }
 
+function getStringValue(formData: FormData, key: string) {
+  const value = formData.get(key)
+  return typeof value === 'string' ? value : ''
+}
+
+function redirectToCreatePost(
+  formData: FormData,
+  options: {
+    error?: string
+    fieldErrors?: Partial<Record<CreatePredictionField, string>>
+  }
+) {
+  const params = new URLSearchParams()
+
+  if (options.error) {
+    params.set('error', options.error)
+  }
+
+  const fieldsToPersist = [
+    'title',
+    'sourceName',
+    'sourceUrl',
+    'description',
+    'tags',
+    'verificationStandards',
+    'verificationDeadline',
+  ] as const
+
+  for (const field of fieldsToPersist) {
+    const value = getStringValue(formData, field)
+
+    if (value) {
+      params.set(field, value)
+    }
+  }
+
+  for (const [field, message] of Object.entries(options.fieldErrors ?? {})) {
+    if (message) {
+      params.set(`${field}Error`, message)
+    }
+  }
+
+  const query = params.toString()
+  redirect(query ? `/post/create?${query}` : '/post/create')
+}
+
+function getPostFieldErrors(formData: FormData) {
+  const title = getStringValue(formData, 'title').trim()
+  const sourceName = getStringValue(formData, 'sourceName').trim()
+  const sourceUrl = getStringValue(formData, 'sourceUrl').trim()
+  const description = getStringValue(formData, 'description').trim()
+
+  return {
+    title:
+      title.length < 8 || title.length > 120
+        ? 'Use 8-120 characters and summarize the claim in one clear sentence.'
+        : undefined,
+    sourceName:
+      sourceName.length < 2 || sourceName.length > 120
+        ? 'Enter the person or organization that made the prediction.'
+        : /^https?:\/\//i.test(sourceName)
+          ? 'Enter the speaker or organization name here, not a URL. Put links in Description.'
+          : undefined,
+    sourceUrl:
+      sourceUrl && !/^https?:\/\/.+/i.test(sourceUrl)
+        ? 'Enter a full URL starting with http:// or https://.'
+        : undefined,
+    description:
+      description.length < 30 || description.length > 5000
+        ? 'Add at least 30 characters of context, including what was said, when, and any useful source link.'
+        : undefined,
+  } satisfies Partial<Record<CreatePredictionField, string>>
+}
+
+function getVerificationFieldErrors(formData: FormData) {
+  const verificationStandards = getStringValue(formData, 'verificationStandards').trim()
+  const verificationDeadline = getStringValue(formData, 'verificationDeadline').trim()
+
+  return {
+    verificationStandards:
+      verificationStandards.length < 5 || verificationStandards.length > 500
+        ? 'Explain what outcome should happen so other users can verify this prediction fairly.'
+        : undefined,
+    verificationDeadline:
+      !verificationDeadline
+        ? 'Choose the date when this prediction should be checked.'
+        : undefined,
+  } satisfies Partial<Record<CreatePredictionField, string>>
+}
+
 export async function createPredictionAction(formData: FormData) {
   const supabase = await createServerSupabaseClient()
 
   if (!supabase) {
-    redirect('/post/create?error=missing-supabase-env')
+    redirectToCreatePost(formData, {
+      error: 'missing-supabase-env',
+    })
   }
+
+  const client = supabase!
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await client.auth.getUser()
 
   if (!user) {
     redirect('/login?next=/post/create')
   }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await client
     .from(LETSWITNESS_TABLES.profiles)
     .select('id, username')
     .eq('id', user.id)
@@ -62,52 +165,56 @@ export async function createPredictionAction(formData: FormData) {
   }
 
   const tags = normalizeTags(formData.get('tags'))
-  const parsedTags = postTagSchema.array().max(5).safeParse(tags)
+  const parsedTags = postTagSchema.array().min(1).max(5).safeParse(tags)
 
   if (!parsedTags.success) {
-    redirect('/post/create?error=invalid-tags')
+    redirectToCreatePost(formData, {
+      error: 'invalid-tags',
+      fieldErrors: {
+        tags: 'Choose 1-5 tags with letters, numbers, or hyphens only.',
+      },
+    })
   }
 
   const parsedPost = createPostSchema.safeParse({
     title: formData.get('title'),
     description: formData.get('description'),
     sourceName: formData.get('sourceName'),
+    sourceUrl: formData.get('sourceUrl'),
     tags: parsedTags.data,
   })
 
   if (!parsedPost.success) {
-    redirect('/post/create?error=invalid-post')
+    redirectToCreatePost(formData, {
+      error: 'invalid-post',
+      fieldErrors: getPostFieldErrors(formData),
+    })
   }
 
-  const eventTypeResult = verificationEventTypeSchema.safeParse(formData.get('eventType'))
-
-  if (!eventTypeResult.success) {
-    redirect('/post/create?error=invalid-event')
-  }
-
+  const postInput = parsedPost.data!
   const verificationInput =
-    eventTypeResult.data === 'time_point'
-      ? timePointVerificationSchema.safeParse({
-          type: 'time_point',
-          title: formData.get('verificationTitle'),
-          description: formData.get('verificationDescription'),
-          targetDate: formData.get('targetDate'),
-        })
-      : eventTriggerVerificationSchema.safeParse({
-          type: 'event_trigger',
-          title: formData.get('verificationTitle'),
-          description: formData.get('verificationDescription'),
-          deadline: formData.get('deadline'),
-        })
+    timePointVerificationSchema.safeParse({
+      type: 'time_point',
+      title: DEFAULT_VERIFICATION_TITLE,
+      description: formData.get('verificationStandards'),
+      targetDate: formData.get('verificationDeadline'),
+    })
 
   if (!verificationInput.success) {
-    redirect('/post/create?error=invalid-event')
+    redirectToCreatePost(formData, {
+      error: 'invalid-event',
+      fieldErrors: getVerificationFieldErrors(formData),
+    })
   }
+
+  const verificationData = verificationInput.data!
 
   const files = getValidFiles(formData)
 
   if (files.length > LETSWITNESS_MEDIA_LIMITS.maxFiles) {
-    redirect('/post/create?error=invalid-media')
+    redirectToCreatePost(formData, {
+      error: 'invalid-media',
+    })
   }
 
   const mediaPayload = files.map((file) => {
@@ -130,32 +237,52 @@ export async function createPredictionAction(formData: FormData) {
   })
 
   if (mediaPayload.some((item) => !item)) {
-    redirect('/post/create?error=invalid-media')
+    redirectToCreatePost(formData, {
+      error: 'invalid-media',
+    })
   }
 
-  const { data: post, error: postError } = await supabase
+  const basePostPayload = {
+    author_id: profile.id,
+    title: postInput.title,
+    description: postInput.description,
+    source_name: postInput.sourceName,
+    status: 'pending',
+    credibility_score: 50,
+  }
+
+  let postResult = await client
     .from(LETSWITNESS_TABLES.posts)
     .insert({
-      author_id: profile.id,
-      title: parsedPost.data.title,
-      description: parsedPost.data.description,
-      source_name: parsedPost.data.sourceName,
-      status: 'pending',
-      credibility_score: 50,
+      ...basePostPayload,
+      source_url: postInput.sourceUrl || null,
     })
     .select('id')
     .single()
 
-  if (postError || !post) {
-    redirect('/post/create?error=create-post-failed')
+  if (postResult.error?.message?.includes('source_url')) {
+    postResult = await client
+      .from(LETSWITNESS_TABLES.posts)
+      .insert(basePostPayload)
+      .select('id')
+      .single()
   }
 
-  const createdPostId = post.id
+  const { data: post, error: postError } = postResult
+
+  if (postError || !post) {
+    redirectToCreatePost(formData, {
+      error: 'create-post-failed',
+    })
+  }
+
+  const createdPost = post!
+  const createdPostId = createdPost.id
 
   try {
-    if (parsedPost.data.tags.length) {
-      await supabase.from(LETSWITNESS_TABLES.tags).upsert(
-        parsedPost.data.tags.map((tag) => ({
+    if (postInput.tags.length) {
+      await client.from(LETSWITNESS_TABLES.tags).upsert(
+        postInput.tags.map((tag) => ({
           slug: tag,
           name: tag,
         })),
@@ -164,17 +291,17 @@ export async function createPredictionAction(formData: FormData) {
         }
       )
 
-      const { data: storedTags, error: tagLookupError } = await supabase
+      const { data: storedTags, error: tagLookupError } = await client
         .from(LETSWITNESS_TABLES.tags)
         .select('id, slug')
-        .in('slug', parsedPost.data.tags)
+        .in('slug', postInput.tags)
 
       if (tagLookupError) {
         throw tagLookupError
       }
 
       if (storedTags?.length) {
-        await supabase.from(LETSWITNESS_TABLES.postTags).insert(
+        await client.from(LETSWITNESS_TABLES.postTags).insert(
           storedTags.map((tag) => ({
             post_id: createdPostId,
             tag_id: tag.id,
@@ -183,28 +310,17 @@ export async function createPredictionAction(formData: FormData) {
       }
     }
 
-    const verificationPayload =
-      verificationInput.data.type === 'time_point'
-        ? {
-            post_id: createdPostId,
-            type: verificationInput.data.type,
-            title: verificationInput.data.title,
-            description: verificationInput.data.description,
-            target_date: verificationInput.data.targetDate,
-            deadline: null,
-            status: 'waiting',
-          }
-        : {
-            post_id: createdPostId,
-            type: verificationInput.data.type,
-            title: verificationInput.data.title,
-            description: verificationInput.data.description,
-            target_date: null,
-            deadline: verificationInput.data.deadline,
-            status: 'waiting',
-          }
+    const verificationPayload = {
+      post_id: createdPostId,
+      type: verificationData.type,
+      title: verificationData.title,
+      description: verificationData.description,
+      target_date: verificationData.targetDate,
+      deadline: null,
+      status: 'waiting',
+    }
 
-    const { error: verificationError } = await supabase
+    const { error: verificationError } = await client
       .from(LETSWITNESS_TABLES.verificationEvents)
       .insert(verificationPayload)
 
@@ -221,7 +337,7 @@ export async function createPredictionAction(formData: FormData) {
         }
 
         const storagePath = `${profile.id}/${createdPostId}/${Date.now()}-${index}-${sanitizeStorageName(item.file.name)}`
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await client.storage
           .from(LETSWITNESS_MEDIA_BUCKET)
           .upload(storagePath, item.file, {
             cacheControl: '3600',
@@ -235,7 +351,7 @@ export async function createPredictionAction(formData: FormData) {
 
         const {
           data: { publicUrl },
-        } = supabase.storage.from(LETSWITNESS_MEDIA_BUCKET).getPublicUrl(storagePath)
+        } = client.storage.from(LETSWITNESS_MEDIA_BUCKET).getPublicUrl(storagePath)
 
         uploadedMedia.push({
           post_id: createdPostId,
@@ -247,7 +363,7 @@ export async function createPredictionAction(formData: FormData) {
       }
 
       if (uploadedMedia.length) {
-        const { error: mediaError } = await supabase
+        const { error: mediaError } = await client
           .from(LETSWITNESS_TABLES.postMedia)
           .insert(uploadedMedia)
 
@@ -257,8 +373,10 @@ export async function createPredictionAction(formData: FormData) {
       }
     }
   } catch {
-    await supabase.from(LETSWITNESS_TABLES.posts).delete().eq('id', createdPostId)
-    redirect('/post/create?error=create-related-records-failed')
+    await client.from(LETSWITNESS_TABLES.posts).delete().eq('id', createdPostId)
+    redirectToCreatePost(formData, {
+      error: 'create-related-records-failed',
+    })
   }
 
   revalidatePath('/')

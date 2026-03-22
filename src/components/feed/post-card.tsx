@@ -26,6 +26,18 @@ export function PostCard({ post }: PostCardProps) {
                 Source: {post.sourceName} · Posted by @{post.author.username} ·{' '}
                 {formatTimeToNow(new Date(post.createdAt))}
               </p>
+              {post.sourceUrl ? (
+                <p className='text-sm text-muted-foreground'>
+                  Source Link:{' '}
+                  <a
+                    className='font-medium text-zinc-900 underline'
+                    href={post.sourceUrl}
+                    rel='noreferrer'
+                    target='_blank'>
+                    Open link
+                  </a>
+                </p>
+              ) : null}
             </div>
             <StatusPill status={post.status} />
           </div>

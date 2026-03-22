@@ -17,10 +17,16 @@ interface PostRow {
   title: string
   description: string
   source_name: string
+  source_url?: string | null
   status: WitnessPost['status']
   credibility_score: number | null
   created_at: string
 }
+
+const POST_SELECT_WITH_SOURCE_URL =
+  'id, author_id, title, description, source_name, source_url, status, credibility_score, created_at'
+const POST_SELECT_LEGACY =
+  'id, author_id, title, description, source_name, status, credibility_score, created_at'
 
 interface ProfileRow {
   id: string
@@ -404,6 +410,7 @@ async function hydratePosts(
       title: post.title,
       description: post.description,
       sourceName: post.source_name,
+      sourceUrl: post.source_url ?? null,
       status: post.status,
       credibilityScore: computedScore,
       credibility,
@@ -439,7 +446,7 @@ async function runExploreQuery(
   const limit = options.limit ?? 50
   let query = supabase
     .from(LETSWITNESS_TABLES.posts)
-    .select('id, author_id, title, description, source_name, status, credibility_score, created_at')
+    .select(POST_SELECT_WITH_SOURCE_URL)
     .order('created_at', { ascending: false })
     .limit(limit)
 
@@ -456,7 +463,34 @@ async function runExploreQuery(
     query = query.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
   }
 
-  const { data, error } = await query
+  const initialResult = await query
+  let data = initialResult.data as PostRow[] | null
+  let error = initialResult.error
+
+  if (error?.message?.includes('source_url')) {
+    let legacyQuery = supabase
+      .from(LETSWITNESS_TABLES.posts)
+      .select(POST_SELECT_LEGACY)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (options.status) {
+      legacyQuery = legacyQuery.eq('status', options.status)
+    }
+
+    if (options.source?.trim()) {
+      legacyQuery = legacyQuery.ilike('source_name', `%${options.source.trim()}%`)
+    }
+
+    if (options.searchText?.trim()) {
+      const pattern = `%${options.searchText.trim()}%`
+      legacyQuery = legacyQuery.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
+    }
+
+    const legacyResult = await legacyQuery
+    data = legacyResult.data as PostRow[] | null
+    error = legacyResult.error
+  }
 
   if (error) {
     return {
@@ -523,16 +557,30 @@ export async function getPostById(id: string): Promise<WitnessPost | null> {
 
   const { data, error } = await supabase
     .from(LETSWITNESS_TABLES.posts)
-    .select('id, author_id, title, description, source_name, status, credibility_score, created_at')
+    .select(POST_SELECT_WITH_SOURCE_URL)
     .eq('id', id)
     .maybeSingle()
 
-  if (error || !data) {
+  let postRow = data as PostRow | null
+  let postError = error
+
+  if (postError?.message?.includes('source_url')) {
+    const legacyResult = await supabase
+      .from(LETSWITNESS_TABLES.posts)
+      .select(POST_SELECT_LEGACY)
+      .eq('id', id)
+      .maybeSingle()
+
+    postRow = legacyResult.data as PostRow | null
+    postError = legacyResult.error
+  }
+
+  if (postError || !postRow) {
     return mockPosts.find((post) => post.id === id) ?? null
   }
 
   const viewerId = await getViewerId(supabase)
-  const posts = await hydratePosts(supabase, [data as PostRow], viewerId)
+  const posts = await hydratePosts(supabase, [postRow], viewerId)
 
   return posts[0] ?? null
 }
@@ -713,15 +761,29 @@ export async function getPostsByUsername(username: string): Promise<WitnessPost[
 
   const { data, error } = await supabase
     .from(LETSWITNESS_TABLES.posts)
-    .select('id, author_id, title, description, source_name, status, credibility_score, created_at')
+    .select(POST_SELECT_WITH_SOURCE_URL)
     .eq('author_id', profile.id)
     .order('created_at', { ascending: false })
 
-  if (error) {
+  let postRows = (data as PostRow[] | null) ?? []
+  let postsError = error
+
+  if (postsError?.message?.includes('source_url')) {
+    const legacyResult = await supabase
+      .from(LETSWITNESS_TABLES.posts)
+      .select(POST_SELECT_LEGACY)
+      .eq('author_id', profile.id)
+      .order('created_at', { ascending: false })
+
+    postRows = (legacyResult.data as PostRow[] | null) ?? []
+    postsError = legacyResult.error
+  }
+
+  if (postsError) {
     return []
   }
 
   const viewerId = await getViewerId(supabase)
 
-  return hydratePosts(supabase, (data as PostRow[] | null) ?? [], viewerId)
+  return hydratePosts(supabase, postRows, viewerId)
 }
