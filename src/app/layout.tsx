@@ -1,4 +1,5 @@
 import Navbar from '@/components/Navbar'
+import { GoogleAnalytics } from '@/components/analytics/google-analytics'
 import { cn } from '@/lib/utils'
 import { Inter } from 'next/font/google'
 import Providers from '@/components/Providers'
@@ -27,6 +28,7 @@ export default function RootLayout({
         inter.className
       )}>
       <body className='min-h-screen bg-slate-50 antialiased'>
+        <GoogleAnalytics />
         <Providers>
           <Navbar />
           <div className='container mx-auto max-w-7xl py-8'>
