@@ -30,8 +30,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
         {query?.created === '1' ? (
           <Card className='border-emerald-200 bg-emerald-50'>
             <CardContent className='p-4 text-sm text-emerald-800'>
-              Prediction created successfully. Voting, comments, and richer media handling will
-              be added next.
+              Prediction published successfully.
             </CardContent>
           </Card>
         ) : null}
@@ -84,17 +83,18 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
           <CardContent className='space-y-3'>
             <VoteMeter score={post.credibilityScore} />
             <p className='text-sm text-muted-foreground'>
-              The MVP uses a worth-verifying meter instead of a generic upvote score.
+              This score reflects how strongly the community believes the record is worth
+              tracking.
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Foundation note</CardTitle>
+            <CardTitle className='text-lg'>Record details</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3 text-sm text-muted-foreground'>
-            <p>Media upload, source links, and real verification-result voting will be attached in the next feature phase.</p>
-            <p>This page now reflects the new LetsWitness data model and route shape: `/post/[id]`.</p>
+            <p>Use the original source, timing, and verification criteria together when judging a prediction.</p>
+            <p>Clear context helps the community decide whether a claim was real and whether it eventually came true.</p>
           </CardContent>
         </Card>
       </aside>

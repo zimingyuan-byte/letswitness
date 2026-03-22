@@ -10,7 +10,7 @@ export default function NotFound() {
           <CardTitle className='text-3xl tracking-tight'>Not found</CardTitle>
         </CardHeader>
         <CardContent className='space-y-4 text-sm text-muted-foreground'>
-          <p>The page or prediction record you requested is not available in this foundation build.</p>
+          <p>The page or prediction record you requested could not be found.</p>
           <Link href='/'>
             <Button>Return home</Button>
           </Link>

@@ -10,8 +10,8 @@ interface LoginPageProps {
 }
 
 const errorMessages: Record<string, string> = {
-  'missing-supabase-env': 'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before testing Google sign-in.',
-  'oauth-failed': 'Google sign-in could not start. Check your Supabase provider settings and callback URL.',
+  'missing-supabase-env': 'Sign-in is temporarily unavailable. Please try again later.',
+  'oauth-failed': 'We could not start sign-in. Please try again.',
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -25,7 +25,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <CardHeader>
           <CardTitle className='text-3xl tracking-tight'>Sign in to LetsWitness</CardTitle>
           <CardDescription>
-            The MVP uses Supabase Auth with Google as the single login method.
+            Continue to publish predictions, manage your profile, and follow records you care
+            about.
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
@@ -36,11 +37,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           ) : null}
           <GoogleAuthButton className='w-full' nextPath={nextPath} />
           <p className='text-sm text-muted-foreground'>
-            New here? Google login will create your account and route you to username setup
-            if needed.
+            New here? We will create your account and help you finish setting up your
+            profile.
           </p>
           <p className='text-sm text-muted-foreground'>
-            The MVP now uses a single `/login` entry point backed by Supabase Auth.
+            You can review and update your public profile after sign-in.
           </p>
           <Link className='text-sm font-medium text-zinc-900 hover:underline' href='/signup'>
             Need the sign-up entry point?

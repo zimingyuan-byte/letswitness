@@ -14,14 +14,14 @@ export default async function Home() {
         <Card className='border-zinc-900 bg-zinc-900 text-white'>
           <CardHeader className='space-y-4'>
             <div className='inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium'>
-              LetsWitness MVP foundation
+              Public prediction archive
             </div>
             <CardTitle className='text-4xl tracking-tight'>
               Record a public prediction now. Let the community witness the outcome later.
             </CardTitle>
             <CardDescription className='max-w-2xl text-sm text-zinc-300'>
-              This rebuilt foundation centers the product on evidence, verification, and
-              community judgement instead of generic social discussion.
+              Capture quotes, claims, and forecasts from people or organizations, then follow
+              whether they hold up over time.
             </CardDescription>
           </CardHeader>
           <CardContent className='flex flex-wrap items-center gap-3'>
@@ -38,10 +38,10 @@ export default async function Home() {
             <CardContent className='flex items-start gap-3 p-6'>
               <ShieldCheck className='mt-0.5 h-5 w-5 text-emerald-600' />
               <div className='space-y-1'>
-                <p className='font-medium'>Google auth via Supabase</p>
+                <p className='font-medium'>Save trustworthy records</p>
                 <p className='text-sm text-muted-foreground'>
-                  The old NextAuth and Prisma session stack has been replaced by a
-                  Supabase-first auth foundation.
+                  Keep claims tied to clear titles, sources, and context so people can review
+                  them fairly later.
                 </p>
               </div>
             </CardContent>
@@ -50,10 +50,10 @@ export default async function Home() {
             <CardContent className='flex items-start gap-3 p-6'>
               <CalendarClock className='mt-0.5 h-5 w-5 text-sky-600' />
               <div className='space-y-1'>
-                <p className='font-medium'>Verification-first UX</p>
+                <p className='font-medium'>Track what happens next</p>
                 <p className='text-sm text-muted-foreground'>
-                  Posts, verification events, credibility voting, and comments now drive
-                  the product direction instead of communities and subscriptions.
+                  Add a date or trigger event so each prediction has a concrete path to
+                  verification.
                 </p>
               </div>
             </CardContent>
@@ -62,10 +62,10 @@ export default async function Home() {
             <CardContent className='flex items-start gap-3 p-6'>
               <Sparkles className='mt-0.5 h-5 w-5 text-violet-600' />
               <div className='space-y-1'>
-                <p className='font-medium'>English-first shell for western audiences</p>
+                <p className='font-medium'>Discuss the evidence</p>
                 <p className='text-sm text-muted-foreground'>
-                  The MVP interface now aligns with the PRD, including new routes,
-                  navigation, and post semantics.
+                  Review credibility, follow updates, and build a shared record around public
+                  claims.
                 </p>
               </div>
             </CardContent>
@@ -79,8 +79,8 @@ export default async function Home() {
             <div>
               <h2 className='text-2xl font-semibold tracking-tight'>Featured predictions</h2>
               <p className='text-sm text-muted-foreground'>
-                Freshly created records from Supabase appear here. If the database is empty,
-                the view falls back to seeded examples.
+                Recent and featured records appear here so visitors can quickly see what is
+                being tracked.
               </p>
             </div>
             <Link
@@ -106,14 +106,14 @@ export default async function Home() {
         <div className='space-y-4'>
           <Card>
             <CardHeader>
-              <CardTitle className='text-lg'>Current foundation status</CardTitle>
+              <CardTitle className='text-lg'>How it works</CardTitle>
               <CardDescription>
-                The repo is now aligned with LetsWitness domain language and route structure.
+                Each post starts with a public claim and a clear path to verification.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-3 text-sm text-muted-foreground'>
-              <p>Completed in this phase: dependency refresh, Supabase auth groundwork, new routing shell, and real post plus verification-event creation.</p>
-              <p>Next phase: credibility votes, verification-result voting, comments, and notifications.</p>
+              <p>Document the original statement, add context, and define when or how it should be checked.</p>
+              <p>Community signals and follow-up discussion help separate strong records from weak or misleading ones.</p>
             </CardContent>
           </Card>
           <Card>
@@ -122,7 +122,7 @@ export default async function Home() {
               <CardDescription>
                 {viewer
                   ? 'You are signed in and can continue with profile setup or content creation.'
-                  : 'Sign in with Google to finish onboarding and start creating prediction records.'}
+                  : 'Sign in to finish onboarding and start creating prediction records.'}
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-3'>

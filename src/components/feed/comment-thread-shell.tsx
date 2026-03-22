@@ -12,11 +12,11 @@ export function CommentThreadShell() {
       </CardHeader>
       <CardContent className='space-y-4 text-sm text-muted-foreground'>
         <p>
-          This foundation phase keeps the comment area lightweight. The next phase will
-          attach real create-comment, reply, and moderation workflows to this section.
+          Comments help add missing context, challenge weak evidence, and highlight details
+          that matter for verification.
         </p>
         <div className='rounded-lg border border-dashed border-border bg-muted/40 p-4'>
-          Top-level comments and one-level replies will be implemented here next.
+          Conversation for this record will appear here.
         </div>
       </CardContent>
     </Card>

@@ -38,7 +38,7 @@ export default async function UserPage({ params }: UserPageProps) {
           </CardHeader>
           <CardContent className='space-y-2 text-sm text-muted-foreground'>
             <p>Prediction posts: {authoredPosts.length}</p>
-            <p>Voting history and verification streaks will appear here next.</p>
+            <p>Browse the records this contributor has published and followed.</p>
           </CardContent>
         </Card>
       </aside>
@@ -46,8 +46,7 @@ export default async function UserPage({ params }: UserPageProps) {
         <div>
           <h1 className='text-3xl font-bold tracking-tight'>Posts by @{profile.username}</h1>
           <p className='text-sm text-muted-foreground'>
-            The user profile is now aligned with the LetsWitness route structure and will
-            later show authored predictions plus participation history.
+            Review this contributor&apos;s published prediction records in one place.
           </p>
         </div>
         {authoredPosts.length ? (

@@ -9,12 +9,12 @@ interface CreatePostPageProps {
 }
 
 const errorMessages: Record<string, string> = {
-  'missing-supabase-env': 'Set your Supabase environment variables before creating posts.',
+  'missing-supabase-env': 'Posting is temporarily unavailable. Please try again later.',
   'invalid-tags': 'Tags must use letters, numbers, or hyphens only, with up to 5 tags total.',
   'invalid-post': 'Please review the title, source, and description fields.',
   'invalid-event': 'Please provide a valid verification event for the selected event type.',
-  'create-post-failed': 'The post record could not be saved.',
-  'create-related-records-failed': 'The verification event or tag links could not be saved.',
+  'create-post-failed': 'Your prediction could not be published. Please try again.',
+  'create-related-records-failed': 'We could not save all post details. Please try again.',
 }
 
 export default async function CreatePostPage({ searchParams }: CreatePostPageProps) {
@@ -36,8 +36,8 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
       <div>
         <h1 className='text-3xl font-bold tracking-tight'>Create prediction</h1>
         <p className='text-sm text-muted-foreground'>
-          Publish a real prediction record and attach the first verification event required by
-          the MVP.
+          Share the original claim, add supporting context, and define how it should be
+          checked later.
         </p>
       </div>
       <CreatePredictionShell errorMessage={errorMessage} />

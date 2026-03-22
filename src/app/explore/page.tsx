@@ -11,8 +11,7 @@ export default async function ExplorePage() {
         <div>
           <h1 className='text-3xl font-bold tracking-tight'>Explore predictions</h1>
           <p className='text-sm text-muted-foreground'>
-            Browse prediction records stored in Supabase. Advanced filtering by status,
-            source, and tags lands in the next iteration.
+            Browse public predictions by topic, source, and current verification status.
           </p>
         </div>
         <div className='space-y-4'>
@@ -30,12 +29,12 @@ export default async function ExplorePage() {
       <aside className='space-y-4'>
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Planned explore filters</CardTitle>
+            <CardTitle className='text-lg'>Explore highlights</CardTitle>
           </CardHeader>
           <CardContent className='space-y-2 text-sm text-muted-foreground'>
-            <p>Status: pending, verifying, fulfilled, unfulfilled, partially fulfilled, expired.</p>
-            <p>Source tags: people, companies, political organizations, media figures.</p>
-            <p>Sort modes: newest, highest credibility, most discussed, soonest to verify.</p>
+            <p>Follow predictions that are still pending, already under review, or fully resolved.</p>
+            <p>Compare claims across public figures, companies, campaigns, and institutions.</p>
+            <p>Spot records that are attracting the most attention from the community.</p>
           </CardContent>
         </Card>
       </aside>

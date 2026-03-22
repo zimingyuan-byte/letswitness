@@ -13,10 +13,10 @@ interface OnboardingPageProps {
 }
 
 const errorMessages: Record<string, string> = {
-  'missing-supabase-env': 'Supabase environment variables are missing.',
+  'missing-supabase-env': 'Profile setup is temporarily unavailable. Please try again later.',
   'invalid-username': 'Use 3-32 letters, numbers, or underscores for your username.',
   'username-taken': 'That username is already taken.',
-  'save-failed': 'Your profile could not be saved. Check that the profiles table exists.',
+  'save-failed': 'Your profile could not be saved. Please try again.',
 }
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
@@ -38,8 +38,8 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
         <CardHeader>
           <CardTitle className='text-3xl tracking-tight'>Choose your username</CardTitle>
           <CardDescription>
-            Google login is the only auth method in MVP. Finish this step to unlock profile
-            and post creation routes.
+            Pick the public name that will appear on your profile and the predictions you
+            publish.
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>

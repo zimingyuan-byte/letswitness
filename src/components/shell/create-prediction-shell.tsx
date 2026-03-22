@@ -17,8 +17,7 @@ export function CreatePredictionShell({ errorMessage }: CreatePredictionShellPro
         <CardHeader>
           <CardTitle>Create a prediction post</CardTitle>
           <CardDescription>
-            Create the first core LetsWitness records with a real post insert plus one
-            verification event. Media stays metadata-only in this phase.
+            Publish a claim, add context, and define how it should be verified later.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,8 +62,7 @@ export function CreatePredictionShell({ errorMessage }: CreatePredictionShellPro
               </p>
             </div>
             <div className='rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground'>
-              Media uploads remain metadata-only in this phase. The actual Supabase Storage
-              upload workflow will be added next.
+              You can add the source details now and expand supporting evidence over time.
             </div>
             <div className='space-y-4 rounded-lg border border-border p-4'>
               <div className='space-y-2'>
@@ -118,8 +116,8 @@ export function CreatePredictionShell({ errorMessage }: CreatePredictionShellPro
       <Card className='border-sky-200 bg-sky-50/70'>
         <CardContent className='flex items-start gap-3 p-6 text-sm text-sky-900'>
           <Info className='mt-0.5 h-4 w-4 shrink-0' />
-          This form now writes the core post record and one verification event. Voting,
-          comments, and media upload still follow in the next feature pass.
+          Be as precise as possible so other people can fairly judge whether the prediction
+          was real and whether it came true.
         </CardContent>
       </Card>
     </div>
