@@ -1,5 +1,5 @@
 import type { PostMediaItem, VerificationEvent } from '@/lib/domain'
-import { Card, CardContent } from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { formatTimeToNow } from '@/lib/utils'
 
 interface VerificationCardProps {
@@ -32,6 +32,9 @@ export function VerificationCard({
 }: VerificationCardProps) {
   return (
     <Card>
+      <CardHeader>
+        <CardTitle className='text-base'>Verification</CardTitle>
+      </CardHeader>
       <CardContent className='space-y-4 text-sm'>
         <div className='rounded-xl border border-zinc-200 bg-white p-4'>
           <div className='space-y-3'>

@@ -19,6 +19,14 @@ export function VerificationVotePanel({
   viewer,
 }: VerificationVotePanelProps) {
   const returnPath = `/post/${postId}`
+  const voteAvailabilityMessage =
+    event.status === 'waiting'
+      ? 'Voting will open after this verification is triggered.'
+      : event.status === 'resolved'
+        ? 'Voting is closed because this verification has already been resolved.'
+        : event.status === 'expired'
+          ? 'Voting is unavailable because this verification expired.'
+          : null
 
   if (!viewer) {
     return (
@@ -60,7 +68,16 @@ export function VerificationVotePanel({
   }
 
   if (event.status !== 'triggered') {
-    return null
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-base'>Vote on the Verification Result</CardTitle>
+        </CardHeader>
+        <CardContent className='text-sm text-muted-foreground'>
+          {voteAvailabilityMessage ?? 'Voting is not available for this verification yet.'}
+        </CardContent>
+      </Card>
+    )
   }
 
   const voteItems = [
