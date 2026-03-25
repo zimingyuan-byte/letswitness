@@ -414,7 +414,7 @@ async function hydratePosts(
       title: post.title,
       description: post.description,
       sourceName: post.source_name,
-      predictionContent: post.prediction_content ?? post.title,
+      predictionContent: post.prediction_content ?? null,
       sourceUrl: post.source_url ?? null,
       status: post.status,
       credibilityScore: computedScore,

@@ -151,7 +151,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
               <div className='space-y-4' key={event.id}>
                 <VerificationCard
                   event={event}
-                  predictionContent={post.predictionContent ?? post.title}
+                  predictionContent={post.predictionContent ?? 'None'}
                   predictionSource={post.sourceName}
                 />
                 <VerificationVotePanel event={event} postId={post.id} viewer={viewer} />
