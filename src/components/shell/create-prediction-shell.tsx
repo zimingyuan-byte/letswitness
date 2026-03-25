@@ -118,21 +118,12 @@ export function CreatePredictionShell({
   }
 
   function toggleTag(tag: string) {
-    setFormValues((current) => {
-      const nextTags = current.tags.includes(tag)
-        ? current.tags.filter((item) => item !== tag)
-        : [...current.tags, tag]
-
-      return {
-        ...current,
-        tags: nextTags,
-      }
-    })
-
-    setCurrentFieldErrors((current) => ({
+    setFormValues((current) => ({
       ...current,
-      tags: null,
+      tags: current.tags.includes(tag) ? current.tags : [...current.tags, tag],
     }))
+
+    clearTagError()
   }
 
   function clearTagError() {
@@ -169,6 +160,20 @@ export function CreatePredictionShell({
 
   function removeCustomTag(tag: string) {
     setCustomTags((current) => current.filter((item) => item !== tag))
+    clearTagError()
+  }
+
+  function removeSelectedTag(tag: string) {
+    if (formValues.tags.includes(tag)) {
+      setFormValues((current) => ({
+        ...current,
+        tags: current.tags.filter((item) => item !== tag),
+      }))
+    } else {
+      removeCustomTag(tag)
+      return
+    }
+
     clearTagError()
   }
 
@@ -314,7 +319,7 @@ export function CreatePredictionShell({
                 <input name='tags' type='hidden' value={combinedTags.join(',')} />
                 <div className='flex flex-wrap gap-2'>
                   {COMMON_TAGS.map((tag) => {
-                    const isSelected = formValues.tags.includes(tag.value)
+                    const isSelected = combinedTags.includes(tag.value)
 
                     return (
                       <button
@@ -345,19 +350,28 @@ export function CreatePredictionShell({
                   <Button onClick={addCustomTag} type='button' variant='outline'>
                     Add Tag
                   </Button>
-                  {customTags.map((tag) => (
-                    <button
-                      key={tag}
-                      className='rounded-full border border-sky-300 bg-sky-100 px-3 py-1.5 text-sm text-sky-900 transition-colors hover:bg-sky-200'
-                      onClick={() => removeCustomTag(tag)}
-                      type='button'>
-                      #{tag}
-                    </button>
-                  ))}
                 </div>
+                {combinedTags.length ? (
+                  <div className='flex flex-wrap items-center gap-2'>
+                    {combinedTags.map((tag) => (
+                      <button
+                        key={tag}
+                        className={cn(
+                          'rounded-full border px-3 py-1.5 text-sm transition-colors',
+                          formValues.tags.includes(tag)
+                            ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800'
+                            : 'border-sky-300 bg-sky-100 text-sky-900 hover:bg-sky-200'
+                        )}
+                        onClick={() => removeSelectedTag(tag)}
+                        type='button'>
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 <p className='text-xs text-muted-foreground'>
-                  Choose common tags and optionally add your own. Press Enter or use Add Tag to
-                  confirm each custom tag. Use up to 5 tags in total.
+                  Click common tags or add custom tags below. All selected tags appear in the
+                  confirmed list underneath and can be removed there. Use up to 5 tags in total.
                 </p>
                 <FieldError message={currentFieldErrors.tags} />
               </div>
