@@ -28,6 +28,7 @@ const COMMON_TAGS = [
 interface CreatePredictionValues {
   title: string
   sourceName: string
+  predictionContent: string
   sourceUrl: string
   description: string
   tags: string[]
@@ -38,6 +39,7 @@ interface CreatePredictionValues {
 interface CreatePredictionFieldErrors {
   title: string | null
   sourceName: string | null
+  predictionContent: string | null
   sourceUrl: string | null
   description: string | null
   tags: string | null
@@ -198,6 +200,7 @@ export function CreatePredictionShell({
     const nextErrors: CreatePredictionFieldErrors = {
       title: null,
       sourceName: null,
+      predictionContent: null,
       sourceUrl: null,
       description: null,
       tags: null,
@@ -207,6 +210,7 @@ export function CreatePredictionShell({
 
     const title = formValues.title.trim()
     const sourceName = formValues.sourceName.trim()
+    const predictionContent = formValues.predictionContent.trim()
     const sourceUrl = formValues.sourceUrl.trim()
     const description = formValues.description.trim()
     const verificationStandards = formValues.verificationStandards.trim()
@@ -220,6 +224,11 @@ export function CreatePredictionShell({
     } else if (/^https?:\/\//i.test(sourceName)) {
       nextErrors.sourceName =
         'Enter the speaker or organization name here, not a URL. Put links in Description.'
+    }
+
+    if (predictionContent.length < 8 || predictionContent.length > 280) {
+      nextErrors.predictionContent =
+        'Summarize the prediction itself in 8-280 characters using one short, clear statement.'
     }
 
     if (sourceUrl && !/^https?:\/\/.+/i.test(sourceUrl)) {
@@ -379,7 +388,7 @@ export function CreatePredictionShell({
 
             <div className='space-y-4 rounded-lg border border-sky-200 bg-sky-50/60 p-5'>
               <div className='space-y-1'>
-                <h2 className='text-base font-semibold text-zinc-900'>Prediction Content</h2>
+                <h2 className='text-base font-semibold text-zinc-900'>Prediction</h2>
                 <p className='text-sm text-muted-foreground'>
                   These fields capture who made the prediction, the original evidence, and how it should be verified.
                 </p>
@@ -399,6 +408,27 @@ export function CreatePredictionShell({
                   value={formValues.sourceName}
                 />
                 <FieldError message={currentFieldErrors.sourceName} />
+              </div>
+
+              <div className='space-y-2'>
+                <Label
+                  className={cn(currentFieldErrors.predictionContent ? 'text-rose-700' : undefined)}
+                  htmlFor='predictionContent'>
+                  Prediction Content
+                </Label>
+                <Textarea
+                  className={getFieldClassName(Boolean(currentFieldErrors.predictionContent))}
+                  id='predictionContent'
+                  name='predictionContent'
+                  onChange={(event) => updateField('predictionContent', event.target.value)}
+                  placeholder='Briefly summarize what the person or organization predicted in a clear sentence.'
+                  required
+                  value={formValues.predictionContent}
+                />
+                <p className='text-xs text-muted-foreground'>
+                  Use short, direct wording to summarize exactly what the person or organization predicted.
+                </p>
+                <FieldError message={currentFieldErrors.predictionContent} />
               </div>
 
               <div className='space-y-2'>

@@ -15,6 +15,7 @@ export const mockPosts: WitnessPost[] = [
     description:
       'A hedge fund partner said in a televised interview that the firm’s AI-focused strategy would beat the S&P 500 by at least 40% before the end of 2026. The post captures the quote, context, and follow-up reporting links for later verification.',
     sourceName: 'Atlantic Capital',
+    predictionContent: 'Atlantic Capital says its AI fund will outperform the S&P 500 by 40% before the end of 2026.',
     status: 'pending',
     credibilityScore: 82,
     credibility: {
@@ -59,6 +60,7 @@ export const mockPosts: WitnessPost[] = [
     description:
       'The statement was made during a Sunday political talk show. This entry stores the video clip and context links, then waits for either the executive order to happen or the deadline to pass.',
     sourceName: 'Northshore Policy PAC',
+    predictionContent: 'Northshore Policy PAC predicts the emergency border order will be signed within the first 100 days.',
     status: 'verifying',
     credibilityScore: 68,
     credibility: {
@@ -103,6 +105,7 @@ export const mockPosts: WitnessPost[] = [
     description:
       'The prediction comes from a keynote at a manufacturing summit. The post includes the video timestamp, transcript excerpt, and analyst coverage to support later review.',
     sourceName: 'Vector Foundry',
+    predictionContent: 'Vector Foundry says the Ohio chip factory will ship its first commercial wafers this year.',
     status: 'partially_fulfilled',
     credibilityScore: 91,
     credibility: {

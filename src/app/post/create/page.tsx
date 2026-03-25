@@ -16,6 +16,7 @@ interface CreatePostPageProps {
     error?: string
     title?: string
     sourceName?: string
+    predictionContent?: string
     sourceUrl?: string
     description?: string
     tags?: string
@@ -23,6 +24,7 @@ interface CreatePostPageProps {
     verificationDeadline?: string
     titleError?: string
     sourceNameError?: string
+    predictionContentError?: string
     sourceUrlError?: string
     descriptionError?: string
     tagsError?: string
@@ -57,6 +59,7 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   const values = {
     title: params.title ?? '',
     sourceName: params.sourceName ?? '',
+    predictionContent: params.predictionContent ?? '',
     sourceUrl: params.sourceUrl ?? '',
     description: params.description ?? '',
     tags: (params.tags ?? '')
@@ -69,6 +72,7 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   const fieldErrors = {
     title: params.titleError ?? null,
     sourceName: params.sourceNameError ?? null,
+    predictionContent: params.predictionContentError ?? null,
     sourceUrl: params.sourceUrlError ?? null,
     description: params.descriptionError ?? null,
     tags: params.tagsError ?? null,

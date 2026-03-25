@@ -20,6 +20,7 @@ export const createPostSchema = z.object({
   title: z.string().trim().min(8).max(120),
   description: z.string().trim().min(30).max(5000),
   sourceName: z.string().trim().min(2).max(120),
+  predictionContent: z.string().trim().min(8).max(280),
   sourceUrl: z
     .string()
     .trim()

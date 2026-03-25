@@ -19,13 +19,14 @@ import {
 type CreatePredictionField =
   | 'title'
   | 'sourceName'
+  | 'predictionContent'
   | 'sourceUrl'
   | 'description'
   | 'tags'
   | 'verificationStandards'
   | 'verificationDeadline'
 
-const DEFAULT_VERIFICATION_TITLE = 'Verification Deadline'
+const DEFAULT_VERIFICATION_TITLE = 'Verification'
 
 function normalizeTags(rawValue: FormDataEntryValue | null) {
   const raw = typeof rawValue === 'string' ? rawValue : ''
@@ -66,6 +67,7 @@ function redirectToCreatePost(
   const fieldsToPersist = [
     'title',
     'sourceName',
+    'predictionContent',
     'sourceUrl',
     'description',
     'tags',
@@ -94,6 +96,7 @@ function redirectToCreatePost(
 function getPostFieldErrors(formData: FormData) {
   const title = getStringValue(formData, 'title').trim()
   const sourceName = getStringValue(formData, 'sourceName').trim()
+  const predictionContent = getStringValue(formData, 'predictionContent').trim()
   const sourceUrl = getStringValue(formData, 'sourceUrl').trim()
   const description = getStringValue(formData, 'description').trim()
 
@@ -108,6 +111,10 @@ function getPostFieldErrors(formData: FormData) {
         : /^https?:\/\//i.test(sourceName)
           ? 'Enter the speaker or organization name here, not a URL. Put links in Description.'
           : undefined,
+    predictionContent:
+      predictionContent.length < 8 || predictionContent.length > 280
+        ? 'Summarize the prediction itself in 8-280 characters using one short, clear statement.'
+        : undefined,
     sourceUrl:
       sourceUrl && !/^https?:\/\/.+/i.test(sourceUrl)
         ? 'Enter a full URL starting with http:// or https://.'
@@ -180,6 +187,7 @@ export async function createPredictionAction(formData: FormData) {
     title: formData.get('title'),
     description: formData.get('description'),
     sourceName: formData.get('sourceName'),
+    predictionContent: formData.get('predictionContent'),
     sourceUrl: formData.get('sourceUrl'),
     tags: parsedTags.data,
   })
@@ -255,10 +263,22 @@ export async function createPredictionAction(formData: FormData) {
     .from(LETSWITNESS_TABLES.posts)
     .insert({
       ...basePostPayload,
+      prediction_content: postInput.predictionContent,
       source_url: postInput.sourceUrl || null,
     })
     .select('id')
     .single()
+
+  if (postResult.error?.message?.includes('prediction_content')) {
+    postResult = await client
+      .from(LETSWITNESS_TABLES.posts)
+      .insert({
+        ...basePostPayload,
+        source_url: postInput.sourceUrl || null,
+      })
+      .select('id')
+      .single()
+  }
 
   if (postResult.error?.message?.includes('source_url')) {
     postResult = await client
