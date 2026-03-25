@@ -40,32 +40,48 @@ export function VerificationCard({
       </CardHeader>
       <CardContent className='space-y-4 text-sm'>
         <div className='rounded-xl border border-zinc-200 bg-white p-4'>
-          <p className='font-medium text-zinc-900'>Prediction</p>
-          <div className='mt-3 space-y-3 text-muted-foreground'>
+          <div className='space-y-3'>
             <p>
-              <span className='font-medium text-zinc-900'>Prediction Source:</span> {predictionSource}
+              <span className='text-zinc-400'>Prediction Source:</span>{' '}
+              <span className='font-semibold text-zinc-950'>{predictionSource}</span>
             </p>
             <p>
-              <span className='font-medium text-zinc-900'>Prediction Content:</span> {predictionContent}
+              <span className='text-zinc-400'>Prediction Content:</span>{' '}
+              <span className='font-semibold text-zinc-950'>{predictionContent}</span>
             </p>
           </div>
         </div>
 
         <div className='rounded-xl border border-sky-200 bg-sky-50/70 p-4'>
-          <p className='font-medium text-zinc-900'>Verification Standards</p>
-          <p className='mt-2 text-muted-foreground'>{event.description}</p>
+          <p className='text-zinc-400'>Verification Standards</p>
+          <p className='mt-2 font-semibold text-zinc-950'>{event.description}</p>
         </div>
 
         <div className='rounded-xl border border-zinc-200 bg-white p-4'>
-          <div className='space-y-3 text-muted-foreground'>
-            {event.targetDate ? <p>Verification Deadline: {event.targetDate}</p> : null}
-            {event.deadline ? <p>Deadline: {event.deadline}</p> : null}
-            {event.triggeredAt ? <p>Triggered: {formatReadableDateTime(event.triggeredAt)}</p> : null}
+          <div className='space-y-3'>
+            {event.targetDate ? (
+              <p>
+                <span className='text-zinc-400'>Verification Deadline:</span>{' '}
+                <span className='text-zinc-950'>{event.targetDate}</span>
+              </p>
+            ) : null}
+            {event.deadline ? (
+              <p>
+                <span className='text-zinc-400'>Deadline:</span>{' '}
+                <span className='text-zinc-950'>{event.deadline}</span>
+              </p>
+            ) : null}
+            {event.triggeredAt ? (
+              <p>
+                <span className='text-zinc-400'>Triggered:</span>{' '}
+                <span className='text-zinc-950'>{formatReadableDateTime(event.triggeredAt)}</span>
+              </p>
+            ) : null}
             {event.evidenceUrl ? (
               <p>
-                Evidence:{' '}
+                <span className='text-zinc-400'>Evidence:</span>{' '}
                 <a
-                  className='font-medium text-zinc-900 underline'
+                  className='text-zinc-950 underline'
                   href={event.evidenceUrl}
                   rel='noreferrer'
                   target='_blank'>
@@ -74,10 +90,19 @@ export function VerificationCard({
               </p>
             ) : null}
             {event.type === 'event_trigger' ? (
-              <p>{event.confirmCount} trigger confirmations</p>
+              <p>
+                <span className='text-zinc-400'>Trigger Confirmations:</span>{' '}
+                <span className='text-zinc-950'>{event.confirmCount}</span>
+              </p>
             ) : null}
-            <p>{event.votes.totalVotes} verification votes</p>
-            <p>Status: {event.status}</p>
+            <p>
+              <span className='text-zinc-400'>Verification Votes:</span>{' '}
+              <span className='text-zinc-950'>{event.votes.totalVotes}</span>
+            </p>
+            <p>
+              <span className='text-zinc-400'>Status:</span>{' '}
+              <span className='text-zinc-950'>{event.status}</span>
+            </p>
           </div>
         </div>
       </CardContent>
