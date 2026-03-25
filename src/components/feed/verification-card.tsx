@@ -31,31 +31,36 @@ export function VerificationCard({ event }: VerificationCardProps) {
           {event.title}
         </CardTitle>
       </CardHeader>
-      <CardContent className='space-y-2 text-sm text-muted-foreground'>
-        <div className='space-y-1'>
+      <CardContent className='grid gap-4 text-sm md:grid-cols-[minmax(0,1.1fr)_minmax(260px,0.9fr)]'>
+        <div className='rounded-xl border border-sky-200 bg-sky-50/70 p-4'>
           <p className='font-medium text-zinc-900'>Verification Standards</p>
-          <p>{event.description}</p>
+          <p className='mt-2 text-muted-foreground'>{event.description}</p>
         </div>
-        {event.targetDate ? <p>Verification Deadline: {event.targetDate}</p> : null}
-        {event.deadline ? <p>Deadline: {event.deadline}</p> : null}
-        {event.triggeredAt ? <p>Triggered: {formatReadableDateTime(event.triggeredAt)}</p> : null}
-        {event.evidenceUrl ? (
-          <p>
-            Evidence:{' '}
-            <a
-              className='font-medium text-zinc-900 underline'
-              href={event.evidenceUrl}
-              rel='noreferrer'
-              target='_blank'>
-              Open link
-            </a>
-          </p>
-        ) : null}
-        {event.type === 'event_trigger' ? (
-          <p>{event.confirmCount} trigger confirmations</p>
-        ) : null}
-        <p>{event.votes.totalVotes} verification votes</p>
-        <p>Status: {event.status}</p>
+
+        <div className='rounded-xl border border-zinc-200 bg-white p-4'>
+          <div className='space-y-3 text-muted-foreground'>
+            {event.targetDate ? <p>Check Date: {event.targetDate}</p> : null}
+            {event.deadline ? <p>Deadline: {event.deadline}</p> : null}
+            {event.triggeredAt ? <p>Triggered: {formatReadableDateTime(event.triggeredAt)}</p> : null}
+            {event.evidenceUrl ? (
+              <p>
+                Evidence:{' '}
+                <a
+                  className='font-medium text-zinc-900 underline'
+                  href={event.evidenceUrl}
+                  rel='noreferrer'
+                  target='_blank'>
+                  Open link
+                </a>
+              </p>
+            ) : null}
+            {event.type === 'event_trigger' ? (
+              <p>{event.confirmCount} trigger confirmations</p>
+            ) : null}
+            <p>{event.votes.totalVotes} verification votes</p>
+            <p>Status: {event.status}</p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )
