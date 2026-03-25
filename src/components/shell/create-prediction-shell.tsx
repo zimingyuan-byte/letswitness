@@ -1,6 +1,6 @@
 'use client'
 
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, useMemo, useRef, useState } from 'react'
+import { type ChangeEvent, type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
 import { Info, Upload } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
@@ -51,6 +51,11 @@ interface CreatePredictionShellProps {
   values: CreatePredictionValues
 }
 
+interface SelectedTag {
+  value: string
+  label: string
+}
+
 function FieldError({ message }: { message?: string | null }) {
   if (!message) {
     return null
@@ -69,37 +74,28 @@ function normalizeTag(tag: string) {
   return tag.trim().toLowerCase().replace(/\s+/g, '-')
 }
 
+function getCommonTag(value: string) {
+  return COMMON_TAGS.find((tag) => tag.value === value)
+}
+
 export function CreatePredictionShell({
   errorMessage,
   fieldErrors,
   values,
 }: CreatePredictionShellProps) {
-  const initialCommonTags = values.tags.filter((tag) =>
-    COMMON_TAGS.some((commonTag) => commonTag.value === tag)
-  )
-  const initialCustomTags = values.tags
-    .filter((tag) => !COMMON_TAGS.some((commonTag) => commonTag.value === tag))
-    .join(', ')
-
   const [formValues, setFormValues] = useState<CreatePredictionValues>({
     ...values,
-    tags: initialCommonTags,
   })
   const [currentFieldErrors, setCurrentFieldErrors] = useState<CreatePredictionFieldErrors>(fieldErrors)
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
-  const [customTags, setCustomTags] = useState(
-    initialCustomTags
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter(Boolean)
-      .map(normalizeTag)
+  const [selectedTags, setSelectedTags] = useState<SelectedTag[]>(
+    values.tags.map((tag) => ({
+      value: tag,
+      label: getCommonTag(tag)?.label ?? tag,
+    }))
   )
   const [customTagInput, setCustomTagInput] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const combinedTags = useMemo(() => {
-    return [...new Set([...formValues.tags, ...customTags])]
-  }, [customTags, formValues.tags])
 
   function updateField<K extends keyof CreatePredictionValues>(
     key: K,
@@ -118,10 +114,27 @@ export function CreatePredictionShell({
   }
 
   function toggleTag(tag: string) {
-    setFormValues((current) => ({
-      ...current,
-      tags: current.tags.includes(tag) ? current.tags : [...current.tags, tag],
-    }))
+    const commonTag = getCommonTag(tag)
+
+    if (!commonTag) {
+      return
+    }
+
+    setSelectedTags((current) => {
+      const exists = current.some((item) => item.value === tag)
+
+      if (exists) {
+        return current.filter((item) => item.value !== tag)
+      }
+
+      return [
+        ...current,
+        {
+          value: commonTag.value,
+          label: commonTag.label,
+        },
+      ]
+    })
 
     clearTagError()
   }
@@ -139,41 +152,33 @@ export function CreatePredictionShell({
   }
 
   function addCustomTag() {
-    const normalized = normalizeTag(customTagInput)
+    const label = customTagInput.trim()
+    const normalized = normalizeTag(label)
 
     if (!normalized) {
       return
     }
 
-    if (
-      COMMON_TAGS.some((tag) => tag.value === normalized && formValues.tags.includes(normalized)) ||
-      customTags.includes(normalized)
-    ) {
+    if (selectedTags.some((tag) => tag.value === normalized)) {
       setCustomTagInput('')
       return
     }
 
-    setCustomTags((current) => [...current, normalized])
+    const matchingCommonTag = getCommonTag(normalized)
+
+    setSelectedTags((current) => [
+      ...current,
+      {
+        value: normalized,
+        label: matchingCommonTag?.label ?? label,
+      },
+    ])
     setCustomTagInput('')
     clearTagError()
   }
 
-  function removeCustomTag(tag: string) {
-    setCustomTags((current) => current.filter((item) => item !== tag))
-    clearTagError()
-  }
-
   function removeSelectedTag(tag: string) {
-    if (formValues.tags.includes(tag)) {
-      setFormValues((current) => ({
-        ...current,
-        tags: current.tags.filter((item) => item !== tag),
-      }))
-    } else {
-      removeCustomTag(tag)
-      return
-    }
-
+    setSelectedTags((current) => current.filter((item) => item.value !== tag))
     clearTagError()
   }
 
@@ -226,9 +231,9 @@ export function CreatePredictionShell({
         'Add at least 30 characters of context, including what was said, when, and any useful source link.'
     }
 
-    if (!combinedTags.length) {
+    if (!selectedTags.length) {
       nextErrors.tags = 'Choose or add at least one tag so readers can discover the prediction.'
-    } else if (combinedTags.length > 5) {
+    } else if (selectedTags.length > 5) {
       nextErrors.tags = 'Choose or add up to 5 tags in total.'
     }
 
@@ -316,10 +321,10 @@ export function CreatePredictionShell({
                 <Label className={cn(currentFieldErrors.tags ? 'text-rose-700' : undefined)} htmlFor='customTags'>
                   Tags
                 </Label>
-                <input name='tags' type='hidden' value={combinedTags.join(',')} />
+                <input name='tags' type='hidden' value={selectedTags.map((tag) => tag.value).join(',')} />
                 <div className='flex flex-wrap gap-2'>
                   {COMMON_TAGS.map((tag) => {
-                    const isSelected = combinedTags.includes(tag.value)
+                    const isSelected = selectedTags.some((item) => item.value === tag.value)
 
                     return (
                       <button
@@ -327,7 +332,7 @@ export function CreatePredictionShell({
                         className={cn(
                           'rounded-full border px-3 py-1.5 text-sm transition-colors',
                           isSelected
-                            ? 'border-zinc-900 bg-zinc-900 text-white'
+                            ? 'border-sky-300 bg-sky-100 text-sky-900 hover:bg-sky-200'
                             : 'border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50',
                           currentFieldErrors.tags ? 'border-rose-300' : undefined
                         )}
@@ -351,15 +356,15 @@ export function CreatePredictionShell({
                     Add Tag
                   </Button>
                 </div>
-                {combinedTags.length ? (
+                {selectedTags.length ? (
                   <div className='flex flex-wrap items-center gap-2'>
-                    {combinedTags.map((tag) => (
+                    {selectedTags.map((tag) => (
                       <button
-                        key={tag}
-                        className='rounded-full border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-zinc-800'
-                        onClick={() => removeSelectedTag(tag)}
+                        key={tag.value}
+                        className='rounded-full border border-sky-300 bg-sky-100 px-3 py-1.5 text-sm text-sky-900 transition-colors hover:bg-sky-200'
+                        onClick={() => removeSelectedTag(tag.value)}
                         type='button'>
-                        #{tag}
+                        #{tag.label}
                       </button>
                     ))}
                   </div>
