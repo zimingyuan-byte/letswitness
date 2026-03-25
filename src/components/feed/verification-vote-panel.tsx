@@ -19,6 +19,7 @@ export function VerificationVotePanel({
   viewer,
 }: VerificationVotePanelProps) {
   const returnPath = `/post/${postId}`
+  const canVote = event.status === 'triggered'
   const voteAvailabilityMessage =
     event.status === 'waiting'
       ? 'Voting will open after this verification is triggered.'
@@ -36,45 +37,6 @@ export function VerificationVotePanel({
         </CardHeader>
         <CardContent className='text-sm text-muted-foreground'>
           Sign in to confirm trigger events and vote on final verification results.
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (event.type === 'event_trigger' && event.status === 'waiting') {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className='text-base'>Trigger This Verification Event</CardTitle>
-        </CardHeader>
-        <CardContent className='space-y-3'>
-          <p className='text-sm text-muted-foreground'>
-            Confirm that the event has happened. It will enter verification after enough
-            confirmations or when the post author confirms it.
-          </p>
-          <form action={submitEventTriggerConfirmAction} className='space-y-3'>
-            <input name='verificationEventId' type='hidden' value={event.id} />
-            <input name='returnPath' type='hidden' value={returnPath} />
-            <div className='space-y-2'>
-              <Input name='evidenceUrl' placeholder='Evidence link (optional)' type='url' />
-            </div>
-            <Button type='submit' variant={event.viewerConfirmed ? 'default' : 'outline'}>
-              {event.viewerConfirmed ? 'Confirmed' : 'Confirm event happened'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  if (event.status !== 'triggered') {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className='text-base'>Vote on the Verification Result</CardTitle>
-        </CardHeader>
-        <CardContent className='text-sm text-muted-foreground'>
-          {voteAvailabilityMessage ?? 'Voting is not available for this verification yet.'}
         </CardContent>
       </Card>
     )
@@ -135,62 +97,101 @@ export function VerificationVotePanel({
         : 'conic-gradient(#e5e7eb 0% 100%)',
   }
 
-  return (
+  const voteCard = (
     <Card>
       <CardHeader>
         <CardTitle className='text-base'>Vote on the Verification Result</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
-        <div className='grid gap-4 md:grid-cols-[220px_minmax(0,1fr)] md:items-center'>
-          <div className='mx-auto flex flex-col items-center gap-3'>
-            <div
-              aria-label='Verification result vote breakdown'
-              className='relative h-40 w-40 rounded-full border border-zinc-200 shadow-sm'
-              role='img'
-              style={pieChartStyle}>
-              <div className='absolute inset-[22%] flex items-center justify-center rounded-full border border-white/80 bg-white text-center shadow-sm'>
-                <div>
-                  <p className='text-2xl font-semibold text-zinc-900'>{totalVotes}</p>
-                  <p className='text-xs text-muted-foreground'>Votes</p>
-                </div>
-              </div>
-            </div>
-            <p className='text-xs text-muted-foreground'>
-              {totalVotes ? 'Live community result distribution' : 'No votes yet'}
-            </p>
-          </div>
-
-          <div className='grid gap-3 sm:grid-cols-3'>
-            {voteItems.map((item, index) => (
+        {!canVote ? (
+          <p className='text-sm text-muted-foreground'>
+            {voteAvailabilityMessage ?? 'Voting is not available for this verification yet.'}
+          </p>
+        ) : null}
+        <div className={canVote ? 'space-y-4' : 'space-y-4 opacity-50'}>
+          <div className='grid gap-4 md:grid-cols-[220px_minmax(0,1fr)] md:items-center'>
+            <div className='mx-auto flex flex-col items-center gap-3'>
               <div
-                className={`rounded-xl border p-4 ${item.bgClassName} ${item.borderClassName}`}
-                key={item.value}>
-                <div className='mb-3 flex items-center gap-2'>
-                  <span className={`h-2.5 w-2.5 rounded-full ${item.dotClassName}`} />
-                  <p className={`text-sm font-medium ${item.textClassName}`}>{item.label}</p>
+                aria-label='Verification result vote breakdown'
+                className='relative h-40 w-40 rounded-full border border-zinc-200 shadow-sm'
+                role='img'
+                style={pieChartStyle}>
+                <div className='absolute inset-[22%] flex items-center justify-center rounded-full border border-white/80 bg-white text-center shadow-sm'>
+                  <div>
+                    <p className='text-2xl font-semibold text-zinc-900'>{totalVotes}</p>
+                    <p className='text-xs text-muted-foreground'>Votes</p>
+                  </div>
                 </div>
-                <p className={`text-2xl font-semibold ${item.textClassName}`}>{percentages[index]}%</p>
-                <p className='text-sm text-muted-foreground'>{item.count} people</p>
               </div>
+              <p className='text-xs text-muted-foreground'>
+                {totalVotes ? 'Live community result distribution' : 'No votes yet'}
+              </p>
+            </div>
+
+            <div className='grid gap-3 sm:grid-cols-3'>
+              {voteItems.map((item, index) => (
+                <div
+                  className={`rounded-xl border p-4 ${item.bgClassName} ${item.borderClassName}`}
+                  key={item.value}>
+                  <div className='mb-3 flex items-center gap-2'>
+                    <span className={`h-2.5 w-2.5 rounded-full ${item.dotClassName}`} />
+                    <p className={`text-sm font-medium ${item.textClassName}`}>{item.label}</p>
+                  </div>
+                  <p className={`text-2xl font-semibold ${item.textClassName}`}>{percentages[index]}%</p>
+                  <p className='text-sm text-muted-foreground'>{item.count} people</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <p className='text-sm text-muted-foreground'>Total voters: {totalVotes}</p>
+          <div className='flex flex-wrap gap-3'>
+            {voteItems.map((item) => (
+              <form action={submitVerificationVoteAction} key={item.value}>
+                <input name='verificationEventId' type='hidden' value={event.id} />
+                <input name='returnPath' type='hidden' value={returnPath} />
+                <input name='result' type='hidden' value={item.value} />
+                <Button
+                  disabled={!canVote}
+                  type='submit'
+                  variant={event.votes.viewerResult === item.value ? 'default' : 'outline'}>
+                  {item.label}
+                </Button>
+              </form>
             ))}
           </div>
-        </div>
-        <p className='text-sm text-muted-foreground'>Total voters: {totalVotes}</p>
-        <div className='flex flex-wrap gap-3'>
-          {voteItems.map((item) => (
-            <form action={submitVerificationVoteAction} key={item.value}>
-              <input name='verificationEventId' type='hidden' value={event.id} />
-              <input name='returnPath' type='hidden' value={returnPath} />
-              <input name='result' type='hidden' value={item.value} />
-              <Button
-                type='submit'
-                variant={event.votes.viewerResult === item.value ? 'default' : 'outline'}>
-                {item.label}
-              </Button>
-            </form>
-          ))}
         </div>
       </CardContent>
     </Card>
   )
+
+  if (event.type === 'event_trigger' && event.status === 'waiting') {
+    return (
+      <>
+        <Card>
+          <CardHeader>
+            <CardTitle className='text-base'>Trigger This Verification Event</CardTitle>
+          </CardHeader>
+          <CardContent className='space-y-3'>
+            <p className='text-sm text-muted-foreground'>
+              Confirm that the event has happened. It will enter verification after enough
+              confirmations or when the post author confirms it.
+            </p>
+            <form action={submitEventTriggerConfirmAction} className='space-y-3'>
+              <input name='verificationEventId' type='hidden' value={event.id} />
+              <input name='returnPath' type='hidden' value={returnPath} />
+              <div className='space-y-2'>
+                <Input name='evidenceUrl' placeholder='Evidence link (optional)' type='url' />
+              </div>
+              <Button type='submit' variant={event.viewerConfirmed ? 'default' : 'outline'}>
+                {event.viewerConfirmed ? 'Confirmed' : 'Confirm event happened'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+        {voteCard}
+      </>
+    )
+  }
+
+  return voteCard
 }
