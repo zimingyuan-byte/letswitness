@@ -24,7 +24,7 @@ export function VerificationVotePanel({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className='text-base'>Community verification</CardTitle>
+          <CardTitle className='text-base'>Community Verification</CardTitle>
         </CardHeader>
         <CardContent className='text-sm text-muted-foreground'>
           Sign in to confirm trigger events and vote on final verification results.
@@ -37,7 +37,7 @@ export function VerificationVotePanel({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className='text-base'>Trigger this verification event</CardTitle>
+          <CardTitle className='text-base'>Trigger This Verification Event</CardTitle>
         </CardHeader>
         <CardContent className='space-y-3'>
           <p className='text-sm text-muted-foreground'>
@@ -121,7 +121,7 @@ export function VerificationVotePanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-base'>Vote on the verification result</CardTitle>
+        <CardTitle className='text-base'>Vote on the Verification Result</CardTitle>
       </CardHeader>
       <CardContent className='space-y-4'>
         <div className='grid gap-4 md:grid-cols-[220px_minmax(0,1fr)] md:items-center'>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CommentThreadShell } from '@/components/feed/comment-thread-shell'
 import { CredibilityVotePanel } from '@/components/feed/credibility-vote-panel'
-import { MediaGallery } from '@/components/feed/media-gallery'
 import { StatusPill } from '@/components/feed/status-pill'
 import { VerificationCard } from '@/components/feed/verification-card'
 import { VerificationVotePanel } from '@/components/feed/verification-vote-panel'
@@ -140,19 +139,19 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
           </CardContent>
         </Card>
 
-        <MediaGallery media={post.media} sourceName={post.sourceName} sourceUrl={post.sourceUrl} />
-
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Verification events</CardTitle>
+            <CardTitle className='text-lg'>Verification Events</CardTitle>
           </CardHeader>
           <CardContent className='space-y-4'>
             {post.verificationEvents.map((event) => (
               <div className='space-y-4' key={event.id}>
                 <VerificationCard
                   event={event}
-                  predictionContent={post.predictionContent ?? 'None'}
+                  media={post.media}
+                  predictionContent={post.predictionContent ?? ''}
                   predictionSource={post.sourceName}
+                  sourceUrl={post.sourceUrl}
                 />
                 <VerificationVotePanel event={event} postId={post.id} viewer={viewer} />
               </div>
@@ -167,7 +166,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
         <CredibilityVotePanel post={post} viewer={viewer} />
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Record details</CardTitle>
+            <CardTitle className='text-lg'>Record Details</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3 text-sm text-muted-foreground'>
             <p>Use the original source, timing, and verification criteria together when judging this prediction record.</p>

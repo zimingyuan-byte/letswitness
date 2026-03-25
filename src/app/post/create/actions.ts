@@ -270,14 +270,9 @@ export async function createPredictionAction(formData: FormData) {
     .single()
 
   if (postResult.error?.message?.includes('prediction_content')) {
-    postResult = await client
-      .from(LETSWITNESS_TABLES.posts)
-      .insert({
-        ...basePostPayload,
-        source_url: postInput.sourceUrl || null,
-      })
-      .select('id')
-      .single()
+    redirectToCreatePost(formData, {
+      error: 'missing-prediction-content-column',
+    })
   }
 
   if (postResult.error?.message?.includes('source_url')) {

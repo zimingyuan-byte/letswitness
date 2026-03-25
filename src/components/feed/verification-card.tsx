@@ -1,5 +1,5 @@
 import { CalendarClock, FlagTriangleRight } from 'lucide-react'
-import type { VerificationEvent } from '@/lib/domain'
+import type { PostMediaItem, VerificationEvent } from '@/lib/domain'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { formatTimeToNow } from '@/lib/utils'
 
@@ -7,6 +7,8 @@ interface VerificationCardProps {
   event: VerificationEvent
   predictionSource: string
   predictionContent: string
+  sourceUrl?: string | null
+  media: PostMediaItem[]
 }
 
 function formatReadableDateTime(value: string) {
@@ -26,6 +28,8 @@ export function VerificationCard({
   event,
   predictionSource,
   predictionContent,
+  sourceUrl,
+  media,
 }: VerificationCardProps) {
   const Icon = event.type === 'time_point' ? CalendarClock : FlagTriangleRight
   const displayTitle = event.title === 'Verification Deadline' ? 'Verification' : event.title
@@ -49,6 +53,53 @@ export function VerificationCard({
               <span className='text-zinc-400'>Prediction Content:</span>{' '}
               <span className='font-semibold text-zinc-950'>{predictionContent}</span>
             </p>
+            {sourceUrl ? (
+              <p>
+                <span className='text-zinc-400'>Prediction Link:</span>{' '}
+                <a
+                  className='text-zinc-950 underline'
+                  href={sourceUrl}
+                  rel='noreferrer'
+                  target='_blank'>
+                  Open Link
+                </a>
+              </p>
+            ) : null}
+            <div>
+              <p className='text-zinc-400'>Media</p>
+              <div className='mt-2'>
+                {media.length ? (
+                  <div className='grid gap-4'>
+                    {media.map((item) => (
+                      <div key={item.id} className='overflow-hidden rounded-lg border bg-white'>
+                        {item.type === 'image' ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            alt='Prediction Media'
+                            className='h-auto max-h-[28rem] w-full object-cover'
+                            src={item.url ?? ''}
+                          />
+                        ) : null}
+                        {item.type === 'audio' ? (
+                          <div className='p-4'>
+                            <audio className='w-full' controls src={item.url ?? undefined}>
+                              Your browser does not support audio playback.
+                            </audio>
+                          </div>
+                        ) : null}
+                        {item.type === 'video' ? (
+                          <video className='max-h-[28rem] w-full bg-black' controls src={item.url ?? undefined}>
+                            Your browser does not support video playback.
+                          </video>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className='text-zinc-950'>No Media</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

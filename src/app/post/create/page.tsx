@@ -35,6 +35,8 @@ interface CreatePostPageProps {
 
 const errorMessages: Record<string, string> = {
   'missing-supabase-env': 'Posting is temporarily unavailable. Please try again later.',
+  'missing-prediction-content-column':
+    'Prediction Content is not ready in the database yet. Please apply the latest Supabase migration and try again.',
   'invalid-tags': 'Tags must use letters, numbers, or hyphens only, with up to 5 tags total.',
   'invalid-media': 'Please upload up to 5 valid image, audio, or video files within the size limits.',
   'invalid-post': 'Please review the highlighted fields before publishing.',
