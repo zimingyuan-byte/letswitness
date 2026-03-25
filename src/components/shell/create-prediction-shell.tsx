@@ -356,12 +356,7 @@ export function CreatePredictionShell({
                     {combinedTags.map((tag) => (
                       <button
                         key={tag}
-                        className={cn(
-                          'rounded-full border px-3 py-1.5 text-sm transition-colors',
-                          formValues.tags.includes(tag)
-                            ? 'border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-800'
-                            : 'border-sky-300 bg-sky-100 text-sky-900 hover:bg-sky-200'
-                        )}
+                        className='rounded-full border border-zinc-900 bg-zinc-900 px-3 py-1.5 text-sm text-white transition-colors hover:bg-zinc-800'
                         onClick={() => removeSelectedTag(tag)}
                         type='button'>
                         #{tag}
