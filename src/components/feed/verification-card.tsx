@@ -1,6 +1,5 @@
-import { CalendarClock, FlagTriangleRight } from 'lucide-react'
 import type { PostMediaItem, VerificationEvent } from '@/lib/domain'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { formatTimeToNow } from '@/lib/utils'
 
 interface VerificationCardProps {
@@ -31,17 +30,8 @@ export function VerificationCard({
   sourceUrl,
   media,
 }: VerificationCardProps) {
-  const Icon = event.type === 'time_point' ? CalendarClock : FlagTriangleRight
-  const displayTitle = event.title === 'Verification Deadline' ? 'Verification' : event.title
-
   return (
     <Card>
-      <CardHeader className='pb-3'>
-        <CardTitle className='flex items-center gap-2 text-base'>
-          <Icon className='h-4 w-4 text-muted-foreground' />
-          {displayTitle}
-        </CardTitle>
-      </CardHeader>
       <CardContent className='space-y-4 text-sm'>
         <div className='rounded-xl border border-zinc-200 bg-white p-4'>
           <div className='space-y-3'>
