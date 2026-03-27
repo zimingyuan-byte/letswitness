@@ -46,7 +46,7 @@ export default async function Home() {
               Explore predictions
             </Link>
             <Link className={buttonVariants({ className: 'bg-emerald-500 text-white hover:bg-emerald-400' })} href='/post/create'>
-              Create prediction
+              Create Tracking
             </Link>
           </CardContent>
         </Card>
@@ -153,7 +153,7 @@ export default async function Home() {
                       {viewer.username ? 'Open profile' : 'Finish profile'}
                     </Link>
                     <Link className={buttonVariants({ variant: 'outline' })} href='/post/create'>
-                      Create prediction
+                      Create Tracking
                     </Link>
                   </div>
                 </>

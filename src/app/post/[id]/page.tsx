@@ -109,7 +109,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
         {query?.created === '1' ? (
           <Card className='border-emerald-200 bg-emerald-50'>
             <CardContent className='p-4 text-sm text-emerald-800'>
-              Prediction published successfully.
+              Tracking published successfully.
             </CardContent>
           </Card>
         ) : null}

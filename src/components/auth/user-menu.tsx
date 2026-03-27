@@ -105,7 +105,7 @@ export function UserMenu({ viewer, notifications, unreadCount }: UserMenuProps) 
         <DropdownMenuItem asChild>
           <Link href='/post/create'>
             <PlusSquare className='mr-2 h-4 w-4' />
-            Create prediction
+            Create Tracking
           </Link>
         </DropdownMenuItem>
         {!viewer.username ? (
