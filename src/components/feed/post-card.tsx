@@ -11,6 +11,12 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
+  const metaPrefix =
+    post.postType === 'tracking' && post.sourceName
+      ? `Source: ${post.sourceName}`
+      : 'Self-authored Prediction'
+  const linkLabel = post.postType === 'tracking' ? 'Source Link' : 'Link'
+
   return (
     <article itemScope itemType='https://schema.org/Article'>
       <Card className='overflow-hidden'>
@@ -23,12 +29,11 @@ export function PostCard({ post }: PostCardProps) {
                 </Link>
               </CardTitle>
               <p className='text-sm text-muted-foreground'>
-                Source: {post.sourceName} · Posted by @{post.author.username} ·{' '}
-                {formatTimeToNow(new Date(post.createdAt))}
+                {metaPrefix} · Posted by @{post.author.username} · {formatTimeToNow(new Date(post.createdAt))}
               </p>
               {post.sourceUrl ? (
                 <p className='text-sm text-muted-foreground'>
-                  Source Link:{' '}
+                  {linkLabel}:{' '}
                   <a
                     className='font-medium text-zinc-900 underline'
                     href={post.sourceUrl}

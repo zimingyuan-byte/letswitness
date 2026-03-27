@@ -16,7 +16,8 @@ interface PostRow {
   author_id: string
   title: string
   description: string
-  source_name: string
+  source_name: string | null
+  post_type?: WitnessPost['postType'] | null
   prediction_content?: string | null
   source_url?: string | null
   status: WitnessPost['status']
@@ -24,7 +25,9 @@ interface PostRow {
   created_at: string
 }
 
-const POST_SELECT_WITH_PREDICTION_CONTENT =
+const POST_SELECT_FULL =
+  'id, author_id, title, description, source_name, post_type, prediction_content, source_url, status, credibility_score, created_at'
+const POST_SELECT_WITHOUT_POST_TYPE =
   'id, author_id, title, description, source_name, prediction_content, source_url, status, credibility_score, created_at'
 const POST_SELECT_WITH_SOURCE_URL =
   'id, author_id, title, description, source_name, source_url, status, credibility_score, created_at'
@@ -163,7 +166,7 @@ function filterMockPosts(posts: WitnessPost[], options: ExplorePostsOptions = {}
       const searchable = [
         post.title,
         post.description,
-        post.sourceName,
+        post.sourceName ?? '',
         post.predictionContent ?? '',
         post.author.username,
         post.author.displayName,
@@ -411,9 +414,10 @@ async function hydratePosts(
 
     return {
       id: post.id,
+      postType: post.post_type ?? 'tracking',
       title: post.title,
       description: post.description,
-      sourceName: post.source_name,
+      sourceName: post.source_name ?? null,
       predictionContent: post.prediction_content ?? null,
       sourceUrl: post.source_url ?? null,
       status: post.status,
@@ -434,6 +438,27 @@ async function hydratePosts(
   })
 }
 
+async function runPostRowQuery(
+  // eslint-disable-next-line no-unused-vars
+  execute: (selectClause: string) => Promise<any>
+) {
+  let result = await execute(POST_SELECT_FULL)
+
+  if (result.error?.message?.includes('post_type')) {
+    result = await execute(POST_SELECT_WITHOUT_POST_TYPE)
+  }
+
+  if (result.error?.message?.includes('prediction_content')) {
+    result = await execute(POST_SELECT_WITH_SOURCE_URL)
+  }
+
+  if (result.error?.message?.includes('source_url')) {
+    result = await execute(POST_SELECT_LEGACY)
+  }
+
+  return result
+}
+
 async function runExploreQuery(
   options: ExplorePostsOptions = {}
 ): Promise<{ supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>; posts: WitnessPost[] }> {
@@ -449,78 +474,31 @@ async function runExploreQuery(
   await syncVerificationStates(supabase)
 
   const limit = options.limit ?? 50
-  let query = supabase
-    .from(LETSWITNESS_TABLES.posts)
-    .select(POST_SELECT_WITH_PREDICTION_CONTENT)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-
-  if (options.status) {
-    query = query.eq('status', options.status)
-  }
-
-  if (options.source?.trim()) {
-    query = query.ilike('source_name', `%${options.source.trim()}%`)
-  }
-
-  if (options.searchText?.trim()) {
-    const pattern = `%${options.searchText.trim()}%`
-    query = query.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
-  }
-
-  const initialResult = await query
-  let data = initialResult.data as PostRow[] | null
-  let error = initialResult.error
-
-  if (error?.message?.includes('prediction_content')) {
-    let fallbackQuery = supabase
+  const result = await runPostRowQuery(async (selectClause) => {
+    let query = supabase
       .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_WITH_SOURCE_URL)
+      .select(selectClause)
       .order('created_at', { ascending: false })
       .limit(limit)
 
     if (options.status) {
-      fallbackQuery = fallbackQuery.eq('status', options.status)
+      query = query.eq('status', options.status)
     }
 
     if (options.source?.trim()) {
-      fallbackQuery = fallbackQuery.ilike('source_name', `%${options.source.trim()}%`)
+      query = query.ilike('source_name', `%${options.source.trim()}%`)
     }
 
     if (options.searchText?.trim()) {
       const pattern = `%${options.searchText.trim()}%`
-      fallbackQuery = fallbackQuery.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
+      query = query.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
     }
 
-    const fallbackResult = await fallbackQuery
-    data = fallbackResult.data as PostRow[] | null
-    error = fallbackResult.error
-  }
+    return await query
+  })
 
-  if (error?.message?.includes('source_url')) {
-    let legacyQuery = supabase
-      .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_LEGACY)
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (options.status) {
-      legacyQuery = legacyQuery.eq('status', options.status)
-    }
-
-    if (options.source?.trim()) {
-      legacyQuery = legacyQuery.ilike('source_name', `%${options.source.trim()}%`)
-    }
-
-    if (options.searchText?.trim()) {
-      const pattern = `%${options.searchText.trim()}%`
-      legacyQuery = legacyQuery.or(`title.ilike.${pattern},description.ilike.${pattern},source_name.ilike.${pattern}`)
-    }
-
-    const legacyResult = await legacyQuery
-    data = legacyResult.data as PostRow[] | null
-    error = legacyResult.error
-  }
+  const data = result.data as PostRow[] | null
+  const error = result.error
 
   if (error) {
     return {
@@ -543,7 +521,8 @@ async function runExploreQuery(
       const searchable = [
         post.title,
         post.description,
-        post.sourceName,
+        post.sourceName ?? '',
+        post.predictionContent ?? '',
         post.author.username,
         post.author.displayName,
         ...post.tags,
@@ -585,36 +564,16 @@ export async function getPostById(id: string): Promise<WitnessPost | null> {
 
   await syncVerificationStates(supabase, [id])
 
-  const { data, error } = await supabase
-    .from(LETSWITNESS_TABLES.posts)
-    .select(POST_SELECT_WITH_PREDICTION_CONTENT)
-    .eq('id', id)
-    .maybeSingle()
-
-  let postRow = data as PostRow | null
-  let postError = error
-
-  if (postError?.message?.includes('prediction_content')) {
-    const fallbackResult = await supabase
+  const result = await runPostRowQuery(async (selectClause) => {
+    return await supabase
       .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_WITH_SOURCE_URL)
+      .select(selectClause)
       .eq('id', id)
       .maybeSingle()
+  })
 
-    postRow = fallbackResult.data as PostRow | null
-    postError = fallbackResult.error
-  }
-
-  if (postError?.message?.includes('source_url')) {
-    const legacyResult = await supabase
-      .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_LEGACY)
-      .eq('id', id)
-      .maybeSingle()
-
-    postRow = legacyResult.data as PostRow | null
-    postError = legacyResult.error
-  }
+  const postRow = result.data as PostRow | null
+  const postError = result.error
 
   if (postError || !postRow) {
     return mockPosts.find((post) => post.id === id) ?? null
@@ -800,36 +759,16 @@ export async function getPostsByUsername(username: string): Promise<WitnessPost[
 
   await syncVerificationStates(supabase)
 
-  const { data, error } = await supabase
-    .from(LETSWITNESS_TABLES.posts)
-    .select(POST_SELECT_WITH_PREDICTION_CONTENT)
-    .eq('author_id', profile.id)
-    .order('created_at', { ascending: false })
-
-  let postRows = (data as PostRow[] | null) ?? []
-  let postsError = error
-
-  if (postsError?.message?.includes('prediction_content')) {
-    const fallbackResult = await supabase
+  const result = await runPostRowQuery(async (selectClause) => {
+    return await supabase
       .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_WITH_SOURCE_URL)
+      .select(selectClause)
       .eq('author_id', profile.id)
       .order('created_at', { ascending: false })
+  })
 
-    postRows = (fallbackResult.data as PostRow[] | null) ?? []
-    postsError = fallbackResult.error
-  }
-
-  if (postsError?.message?.includes('source_url')) {
-    const legacyResult = await supabase
-      .from(LETSWITNESS_TABLES.posts)
-      .select(POST_SELECT_LEGACY)
-      .eq('author_id', profile.id)
-      .order('created_at', { ascending: false })
-
-    postRows = (legacyResult.data as PostRow[] | null) ?? []
-    postsError = legacyResult.error
-  }
+  const postRows = (result.data as PostRow[] | null) ?? []
+  const postsError = result.error
 
   if (postsError) {
     return []

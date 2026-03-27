@@ -108,6 +108,12 @@ export function UserMenu({ viewer, notifications, unreadCount }: UserMenuProps) 
             Create Tracking
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href='/prediction/create'>
+            <PlusSquare className='mr-2 h-4 w-4' />
+            Create Prediction
+          </Link>
+        </DropdownMenuItem>
         {!viewer.username ? (
           <DropdownMenuItem asChild>
             <Link href='/onboarding'>Finish profile</Link>

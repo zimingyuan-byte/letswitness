@@ -11,6 +11,7 @@ export const mockViewer: ViewerProfile = {
 export const mockPosts: WitnessPost[] = [
   {
     id: 'atlantic-ai-power',
+    postType: 'tracking',
     title: 'Atlantic Capital claims its AI fund will outperform the S&P 500 by 40% in 2026',
     description:
       'A hedge fund partner said in a televised interview that the firm’s AI-focused strategy would beat the S&P 500 by at least 40% before the end of 2026. The post captures the quote, context, and follow-up reporting links for later verification.',
@@ -56,6 +57,7 @@ export const mockPosts: WitnessPost[] = [
   },
   {
     id: 'election-border-policy',
+    postType: 'tracking',
     title: 'Campaign spokesperson predicts the emergency border order will be signed in the first 100 days',
     description:
       'The statement was made during a Sunday political talk show. This entry stores the video clip and context links, then waits for either the executive order to happen or the deadline to pass.',
@@ -101,6 +103,7 @@ export const mockPosts: WitnessPost[] = [
   },
   {
     id: 'chip-factory-launch',
+    postType: 'tracking',
     title: 'CEO says the Ohio chip factory will ship its first commercial wafers this year',
     description:
       'The prediction comes from a keynote at a manufacturing summit. The post includes the video timestamp, transcript excerpt, and analyst coverage to support later review.',

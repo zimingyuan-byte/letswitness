@@ -2,12 +2,12 @@
 
 import { type ChangeEvent, type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
 import { Info, Upload } from 'lucide-react'
-import { createPredictionAction } from '@/app/prediction/create/actions'
-import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
+import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
+import { createTrackingAction } from '@/app/post/create/actions'
 import { cn } from '@/lib/utils'
 
 const COMMON_TAGS = [
@@ -25,8 +25,9 @@ const COMMON_TAGS = [
   { label: 'Geopolitics', value: 'geopolitics' },
 ] as const
 
-interface CreatePredictionValues {
+interface CreateTrackingValues {
   title: string
+  sourceName: string
   predictionContent: string
   sourceUrl: string
   description: string
@@ -35,8 +36,9 @@ interface CreatePredictionValues {
   verificationDeadline: string
 }
 
-interface CreatePredictionFieldErrors {
+interface CreateTrackingFieldErrors {
   title: string | null
+  sourceName: string | null
   predictionContent: string | null
   sourceUrl: string | null
   description: string | null
@@ -45,10 +47,10 @@ interface CreatePredictionFieldErrors {
   verificationDeadline: string | null
 }
 
-interface CreatePredictionShellProps {
+interface CreateTrackingShellProps {
   errorMessage?: string | null
-  fieldErrors: CreatePredictionFieldErrors
-  values: CreatePredictionValues
+  fieldErrors: CreateTrackingFieldErrors
+  values: CreateTrackingValues
 }
 
 interface SelectedTag {
@@ -78,16 +80,15 @@ function getCommonTag(value: string) {
   return COMMON_TAGS.find((tag) => tag.value === value)
 }
 
-export function CreatePredictionShell({
+export function CreateTrackingShell({
   errorMessage,
   fieldErrors,
   values,
-}: CreatePredictionShellProps) {
-  const [formValues, setFormValues] = useState<CreatePredictionValues>({
+}: CreateTrackingShellProps) {
+  const [formValues, setFormValues] = useState<CreateTrackingValues>({
     ...values,
   })
-  const [currentFieldErrors, setCurrentFieldErrors] =
-    useState<CreatePredictionFieldErrors>(fieldErrors)
+  const [currentFieldErrors, setCurrentFieldErrors] = useState<CreateTrackingFieldErrors>(fieldErrors)
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
   const [selectedTags, setSelectedTags] = useState<SelectedTag[]>(
     values.tags.map((tag) => ({
@@ -98,26 +99,19 @@ export function CreatePredictionShell({
   const [customTagInput, setCustomTagInput] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  function updateField<K extends keyof CreatePredictionValues>(
+  function updateField<K extends keyof CreateTrackingValues>(
     key: K,
-    value: CreatePredictionValues[K]
+    value: CreateTrackingValues[K]
   ) {
     setFormValues((current) => ({
       ...current,
       [key]: value,
     }))
 
-    const errorKey = key as keyof CreatePredictionFieldErrors
+    const errorKey = key as keyof CreateTrackingFieldErrors
     setCurrentFieldErrors((current) => ({
       ...current,
       [errorKey]: null,
-    }))
-  }
-
-  function clearTagError() {
-    setCurrentFieldErrors((current) => ({
-      ...current,
-      tags: null,
     }))
   }
 
@@ -147,6 +141,13 @@ export function CreatePredictionShell({
     clearTagError()
   }
 
+  function clearTagError() {
+    setCurrentFieldErrors((current) => ({
+      ...current,
+      tags: null,
+    }))
+  }
+
   function handleCustomTagsChange(value: string) {
     setCustomTagInput(value)
     clearTagError()
@@ -166,6 +167,7 @@ export function CreatePredictionShell({
     }
 
     const matchingCommonTag = getCommonTag(normalized)
+
     setSelectedTags((current) => [
       ...current,
       {
@@ -195,8 +197,9 @@ export function CreatePredictionShell({
   }
 
   function validateForm() {
-    const nextErrors: CreatePredictionFieldErrors = {
+    const nextErrors: CreateTrackingFieldErrors = {
       title: null,
+      sourceName: null,
       predictionContent: null,
       sourceUrl: null,
       description: null,
@@ -206,6 +209,7 @@ export function CreatePredictionShell({
     }
 
     const title = formValues.title.trim()
+    const sourceName = formValues.sourceName.trim()
     const predictionContent = formValues.predictionContent.trim()
     const sourceUrl = formValues.sourceUrl.trim()
     const description = formValues.description.trim()
@@ -213,6 +217,13 @@ export function CreatePredictionShell({
 
     if (title.length < 8 || title.length > 120) {
       nextErrors.title = 'Use 8-120 characters and summarize the claim in one clear sentence.'
+    }
+
+    if (sourceName.length < 2 || sourceName.length > 120) {
+      nextErrors.sourceName = 'Enter the person or organization that made the prediction.'
+    } else if (/^https?:\/\//i.test(sourceName)) {
+      nextErrors.sourceName =
+        'Enter the speaker or organization name here, not a URL. Put links in the Link field instead.'
     }
 
     if (predictionContent.length < 8 || predictionContent.length > 280) {
@@ -262,15 +273,11 @@ export function CreatePredictionShell({
     <div className='space-y-6'>
       <Card>
         <CardHeader>
-          <CardTitle>Create Prediction</CardTitle>
-          <CardDescription>Publish your own prediction and define how it should be verified later.</CardDescription>
+          <CardTitle>Create Tracking</CardTitle>
+          <CardDescription>Publish a tracking record and define how it should be verified later.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            action={createPredictionAction}
-            className='space-y-5'
-            noValidate
-            onSubmit={handleSubmit}>
+          <form action={createTrackingAction} className='space-y-5' noValidate onSubmit={handleSubmit}>
             {errorMessage ? (
               <div className='rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700'>
                 {errorMessage}
@@ -281,7 +288,7 @@ export function CreatePredictionShell({
               <div className='space-y-1'>
                 <h2 className='text-base font-semibold text-zinc-900'>Post Description</h2>
                 <p className='text-sm text-muted-foreground'>
-                  These fields describe the post itself and help readers understand the prediction at a glance.
+                  These fields describe the post itself and help readers understand the record at a glance.
                 </p>
               </div>
 
@@ -302,9 +309,7 @@ export function CreatePredictionShell({
               </div>
 
               <div className='space-y-2'>
-                <Label
-                  className={cn(currentFieldErrors.description ? 'text-rose-700' : undefined)}
-                  htmlFor='description'>
+                <Label className={cn(currentFieldErrors.description ? 'text-rose-700' : undefined)} htmlFor='description'>
                   Description
                 </Label>
                 <Textarea
@@ -312,7 +317,7 @@ export function CreatePredictionShell({
                   id='description'
                   name='description'
                   onChange={(event) => updateField('description', event.target.value)}
-                  placeholder='Add context, background, or supporting notes for why this prediction matters.'
+                  placeholder='Add context, evidence links, or background for why this prediction matters.'
                   required
                   value={formValues.description}
                 />
@@ -348,8 +353,8 @@ export function CreatePredictionShell({
                 <Input
                   className={getFieldClassName(Boolean(currentFieldErrors.tags))}
                   id='customTags'
-                  onChange={(event) => handleCustomTagsChange(event.target.value)}
                   onKeyDown={handleCustomTagKeyDown}
+                  onChange={(event) => handleCustomTagsChange(event.target.value)}
                   placeholder='Type a custom tag and press Enter'
                   value={customTagInput}
                 />
@@ -372,7 +377,8 @@ export function CreatePredictionShell({
                   </div>
                 ) : null}
                 <p className='text-xs text-muted-foreground'>
-                  Click common tags or add custom tags below. All selected tags appear in the confirmed list underneath and can be removed there. Use up to 5 tags in total.
+                  Click common tags or add custom tags below. All selected tags appear in the
+                  confirmed list underneath and can be removed there. Use up to 5 tags in total.
                 </p>
                 <FieldError message={currentFieldErrors.tags} />
               </div>
@@ -382,8 +388,24 @@ export function CreatePredictionShell({
               <div className='space-y-1'>
                 <h2 className='text-base font-semibold text-zinc-900'>Prediction</h2>
                 <p className='text-sm text-muted-foreground'>
-                  These fields capture your prediction, optional supporting materials, and how it should be verified.
+                  These fields capture who made the prediction, the original evidence, and how it should be verified.
                 </p>
+              </div>
+
+              <div className='space-y-2'>
+                <Label className={cn(currentFieldErrors.sourceName ? 'text-rose-700' : undefined)} htmlFor='sourceName'>
+                  Prediction Source
+                </Label>
+                <Input
+                  className={getFieldClassName(Boolean(currentFieldErrors.sourceName))}
+                  id='sourceName'
+                  name='sourceName'
+                  onChange={(event) => updateField('sourceName', event.target.value)}
+                  placeholder='Person or organization making the prediction'
+                  required
+                  value={formValues.sourceName}
+                />
+                <FieldError message={currentFieldErrors.sourceName} />
               </div>
 
               <div className='space-y-2'>
@@ -397,75 +419,67 @@ export function CreatePredictionShell({
                   id='predictionContent'
                   name='predictionContent'
                   onChange={(event) => updateField('predictionContent', event.target.value)}
-                  placeholder='Briefly summarize your prediction in one clear sentence.'
+                  placeholder='Briefly summarize what the person or organization predicted in a clear sentence.'
                   required
                   value={formValues.predictionContent}
                 />
                 <p className='text-xs text-muted-foreground'>
-                  Use short, direct wording so readers can quickly understand exactly what you predict will happen.
+                  Use short, direct wording to summarize exactly what the person or organization predicted.
                 </p>
                 <FieldError message={currentFieldErrors.predictionContent} />
               </div>
 
-              <div className='space-y-4 rounded-lg border border-white/70 bg-white/80 p-4 shadow-sm'>
-                <div className='space-y-1'>
-                  <h3 className='text-sm font-semibold text-zinc-900'>Related Information (Optional)</h3>
-                  <p className='text-xs text-muted-foreground'>
-                    Add files or a link if you want to attach background material to this prediction.
+              <div className='space-y-2'>
+                <Label htmlFor='mediaFiles'>Evidence Media</Label>
+                <input
+                  accept='image/*,audio/*,video/*'
+                  className='sr-only'
+                  id='mediaFiles'
+                  multiple
+                  name='mediaFiles'
+                  onChange={handleFileChange}
+                  ref={fileInputRef}
+                  type='file'
+                />
+                <div className='flex flex-wrap items-center gap-3'>
+                  <Button onClick={() => fileInputRef.current?.click()} type='button' variant='outline'>
+                    <Upload className='mr-2 h-4 w-4' />
+                    Choose Files
+                  </Button>
+                  <p className='text-sm text-muted-foreground'>
+                    {selectedFiles.length
+                      ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} selected`
+                      : 'No files selected yet'}
                   </p>
                 </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='mediaFiles'>Media</Label>
-                  <input
-                    accept='image/*,audio/*,video/*'
-                    className='sr-only'
-                    id='mediaFiles'
-                    multiple
-                    name='mediaFiles'
-                    onChange={handleFileChange}
-                    ref={fileInputRef}
-                    type='file'
-                  />
-                  <div className='flex flex-wrap items-center gap-3'>
-                    <Button onClick={() => fileInputRef.current?.click()} type='button' variant='outline'>
-                      <Upload className='mr-2 h-4 w-4' />
-                      Choose Files
-                    </Button>
-                    <p className='text-sm text-muted-foreground'>
-                      {selectedFiles.length
-                        ? `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} selected`
-                        : 'No files selected yet'}
-                    </p>
+                {selectedFiles.length ? (
+                  <div className='rounded-lg border border-border bg-white px-3 py-2 text-xs text-slate-600'>
+                    {selectedFiles.join(', ')}
                   </div>
-                  {selectedFiles.length ? (
-                    <div className='rounded-lg border border-border bg-white px-3 py-2 text-xs text-slate-600'>
-                      {selectedFiles.join(', ')}
-                    </div>
-                  ) : null}
-                  <p className='text-xs text-muted-foreground'>
-                    Up to 5 files total. Images up to 10MB, audio up to 50MB, and video up to 200MB.
-                  </p>
-                </div>
+                ) : null}
+                <p className='text-xs text-muted-foreground'>
+                  Up to 5 files total. Images up to 10MB, audio up to 50MB, and video up to
+                  200MB.
+                </p>
+              </div>
 
-                <div className='space-y-2'>
-                  <Label className={cn(currentFieldErrors.sourceUrl ? 'text-rose-700' : undefined)} htmlFor='sourceUrl'>
-                    Link (Optional)
-                  </Label>
-                  <Input
-                    className={getFieldClassName(Boolean(currentFieldErrors.sourceUrl))}
-                    id='sourceUrl'
-                    name='sourceUrl'
-                    onChange={(event) => updateField('sourceUrl', event.target.value)}
-                    placeholder='https://example.com/background-reference'
-                    type='url'
-                    value={formValues.sourceUrl}
-                  />
-                  <p className='text-xs text-muted-foreground'>
-                    Paste an article, note, thread, or any related reference link if you want to give more context.
-                  </p>
-                  <FieldError message={currentFieldErrors.sourceUrl} />
-                </div>
+              <div className='space-y-2'>
+                <Label className={cn(currentFieldErrors.sourceUrl ? 'text-rose-700' : undefined)} htmlFor='sourceUrl'>
+                  Source Link (Optional)
+                </Label>
+                <Input
+                  className={getFieldClassName(Boolean(currentFieldErrors.sourceUrl))}
+                  id='sourceUrl'
+                  name='sourceUrl'
+                  onChange={(event) => updateField('sourceUrl', event.target.value)}
+                  placeholder='https://example.com/original-source'
+                  type='url'
+                  value={formValues.sourceUrl}
+                />
+                <p className='text-xs text-muted-foreground'>
+                  Paste the original article, video, post, or transcript link here if one exists.
+                </p>
+                <FieldError message={currentFieldErrors.sourceUrl} />
               </div>
 
               <div className='space-y-4 rounded-lg border border-white/70 bg-white/80 p-4 shadow-sm'>
@@ -505,19 +519,21 @@ export function CreatePredictionShell({
                 </div>
 
                 <p className='text-xs text-muted-foreground'>
-                  Every new prediction uses a time-point verification workflow and will be checked on the deadline above.
+                  Every new prediction uses a time-point verification workflow and will be checked on
+                  the deadline above.
                 </p>
               </div>
             </div>
 
-            <Button type='submit'>Publish Prediction</Button>
+            <Button type='submit'>Publish Tracking</Button>
           </form>
         </CardContent>
       </Card>
       <Card className='border-sky-200 bg-sky-50/70'>
         <CardContent className='flex items-start gap-3 p-6 text-sm text-sky-900'>
           <Info className='mt-0.5 h-4 w-4 shrink-0' />
-          Be as precise as possible so other people can fairly judge what you predicted and whether it eventually came true.
+          Be as precise as possible so other people can fairly judge whether the prediction
+          was real and whether it came true.
         </CardContent>
       </Card>
     </div>

@@ -16,10 +16,9 @@ export const postTagSchema = z
   .max(32)
   .regex(/^[a-z0-9-]+$/i, 'Tags can contain letters, numbers, and hyphens only.')
 
-export const createPostSchema = z.object({
+const createBasePostSchema = z.object({
   title: z.string().trim().min(8).max(120),
   description: z.string().trim().min(30).max(5000),
-  sourceName: z.string().trim().min(2).max(120),
   predictionContent: z.string().trim().min(8).max(280),
   sourceUrl: z
     .string()
@@ -31,10 +30,20 @@ export const createPostSchema = z.object({
   tags: z.array(postTagSchema).min(1).max(5).default([]),
 })
 
+export const createTrackingSchema = createBasePostSchema.extend({
+  sourceName: z.string().trim().min(2).max(120),
+})
+
+export const createPredictionSchema = createBasePostSchema
+
+export const postTypeSchema = z.enum(['tracking', 'prediction'])
+
 export const postSupplementSchema = z.object({
   postId: z.string().uuid(),
   content: z.string().trim().min(5).max(2000),
 })
 
-export type CreatePostInput = z.infer<typeof createPostSchema>
+export type CreateTrackingInput = z.infer<typeof createTrackingSchema>
+export type CreatePredictionInput = z.infer<typeof createPredictionSchema>
 export type PostStatus = z.infer<typeof postStatusSchema>
+export type PostType = z.infer<typeof postTypeSchema>

@@ -1,10 +1,11 @@
-import type { PostMediaItem, VerificationEvent } from '@/lib/domain'
+import type { PostMediaItem, PostType, VerificationEvent } from '@/lib/domain'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { formatTimeToNow } from '@/lib/utils'
 
 interface VerificationCardProps {
   event: VerificationEvent
-  predictionSource: string
+  postType: PostType
+  predictionSource?: string | null
   predictionContent: string
   sourceUrl?: string | null
   media: PostMediaItem[]
@@ -25,11 +26,14 @@ function formatReadableDateTime(value: string) {
 
 export function VerificationCard({
   event,
+  postType,
   predictionSource,
   predictionContent,
   sourceUrl,
   media,
 }: VerificationCardProps) {
+  const linkLabel = postType === 'tracking' ? 'Prediction Link' : 'Link'
+
   return (
     <Card>
       <CardHeader>
@@ -38,17 +42,19 @@ export function VerificationCard({
       <CardContent className='space-y-4 text-sm'>
         <div className='rounded-xl border border-zinc-200 bg-white p-4'>
           <div className='space-y-3'>
-            <p>
-              <span className='text-zinc-400'>Prediction Source:</span>{' '}
-              <span className='font-semibold text-zinc-950'>{predictionSource}</span>
-            </p>
+            {postType === 'tracking' && predictionSource ? (
+              <p>
+                <span className='text-zinc-400'>Prediction Source:</span>{' '}
+                <span className='font-semibold text-zinc-950'>{predictionSource}</span>
+              </p>
+            ) : null}
             <p>
               <span className='text-zinc-400'>Prediction Content:</span>{' '}
               <span className='font-semibold text-zinc-950'>{predictionContent}</span>
             </p>
             {sourceUrl ? (
               <p>
-                <span className='text-zinc-400'>Prediction Link:</span>{' '}
+                <span className='text-zinc-400'>{linkLabel}:</span>{' '}
                 <a
                   className='text-zinc-950 underline'
                   href={sourceUrl}

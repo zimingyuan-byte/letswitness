@@ -1,21 +1,20 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { CreateTrackingShell } from '@/components/shell/create-tracking-shell'
+import { CreatePredictionShell } from '@/components/shell/create-prediction-shell'
 import { getViewerProfile } from '@/lib/data/posts'
 
 export const metadata: Metadata = {
-  title: 'Create Tracking',
+  title: 'Create Prediction',
   robots: {
     index: false,
     follow: false,
   },
 }
 
-interface CreatePostPageProps {
+interface CreatePredictionPageProps {
   searchParams?: Promise<{
     error?: string
     title?: string
-    sourceName?: string
     predictionContent?: string
     sourceUrl?: string
     description?: string
@@ -23,7 +22,6 @@ interface CreatePostPageProps {
     verificationStandards?: string
     verificationDeadline?: string
     titleError?: string
-    sourceNameError?: string
     predictionContentError?: string
     sourceUrlError?: string
     descriptionError?: string
@@ -43,16 +41,16 @@ const errorMessages: Record<string, string> = {
   'invalid-media': 'Please upload up to 5 valid image, audio, or video files within the size limits.',
   'invalid-post': 'Please review the highlighted fields before publishing.',
   'invalid-event': 'Please provide valid verification standards and a verification deadline.',
-  'create-post-failed': 'Your tracking record could not be published. Please try again.',
-  'create-related-records-failed': 'We could not save all tracking details. Please try again.',
+  'create-post-failed': 'Your prediction could not be published. Please try again.',
+  'create-related-records-failed': 'We could not save all prediction details. Please try again.',
 }
 
-export default async function CreatePostPage({ searchParams }: CreatePostPageProps) {
+export default async function CreatePredictionPage({ searchParams }: CreatePredictionPageProps) {
   const viewer = await getViewerProfile()
   const params = (await searchParams) ?? {}
 
   if (!viewer) {
-    redirect('/login?next=/post/create')
+    redirect('/login?next=/prediction/create')
   }
 
   if (!viewer.username) {
@@ -62,7 +60,6 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   const errorMessage = params.error ? errorMessages[params.error] : null
   const values = {
     title: params.title ?? '',
-    sourceName: params.sourceName ?? '',
     predictionContent: params.predictionContent ?? '',
     sourceUrl: params.sourceUrl ?? '',
     description: params.description ?? '',
@@ -75,7 +72,6 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   } as const
   const fieldErrors = {
     title: params.titleError ?? null,
-    sourceName: params.sourceNameError ?? null,
     predictionContent: params.predictionContentError ?? null,
     sourceUrl: params.sourceUrlError ?? null,
     description: params.descriptionError ?? null,
@@ -87,13 +83,12 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   return (
     <div className='mx-auto max-w-3xl space-y-4'>
       <div>
-        <h1 className='text-3xl font-bold tracking-tight'>Create Tracking</h1>
+        <h1 className='text-3xl font-bold tracking-tight'>Create Prediction</h1>
         <p className='text-sm text-muted-foreground'>
-          Share the original claim, add supporting context, and define how it should be
-          checked later.
+          Publish your own prediction, add supporting context, and define how it should be checked later.
         </p>
       </div>
-      <CreateTrackingShell
+      <CreatePredictionShell
         errorMessage={errorMessage}
         fieldErrors={fieldErrors}
         values={values}

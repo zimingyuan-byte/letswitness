@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseEnv } from '@/lib/supabase/env'
 
-const protectedPaths = ['/post/create', '/onboarding']
+const protectedPaths = ['/post/create', '/prediction/create', '/onboarding']
 const authPaths = ['/login', '/signup']
 
 export async function updateSession(request: NextRequest) {

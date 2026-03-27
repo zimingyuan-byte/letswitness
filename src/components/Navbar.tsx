@@ -46,6 +46,14 @@ const Navbar = async () => {
             <Plus className='mr-2 h-4 w-4' />
             Create Tracking
           </Link>
+          <Link
+            href='/prediction/create'
+            className={buttonVariants({
+              className: 'hidden md:inline-flex',
+            })}>
+            <Plus className='mr-2 h-4 w-4' />
+            Create Prediction
+          </Link>
           {viewer ? (
             <UserMenu
               notifications={notifications.items}

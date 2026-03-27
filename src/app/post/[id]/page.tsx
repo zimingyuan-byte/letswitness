@@ -38,14 +38,17 @@ export async function generateMetadata({
     }
   }
 
-  const description = `Track and verify this public prediction from ${post.sourceName}. Review the evidence, verification events, and community credibility discussion on LetsWitness.`
+  const description =
+    post.postType === 'tracking' && post.sourceName
+      ? `Track and verify this public prediction from ${post.sourceName}. Review the evidence, verification events, and community credibility discussion on LetsWitness.`
+      : 'Track and verify this self-authored prediction. Review the evidence, verification events, and community credibility discussion on LetsWitness.'
 
   return {
     title: `${post.title} | Prediction Tracking Record`,
     description,
     keywords: [
       ...siteConfig.keywords,
-      post.sourceName,
+      ...(post.sourceName ? [post.sourceName] : []),
       ...post.tags,
       'prediction record',
       'prediction verification',
@@ -91,12 +94,16 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
     datePublished: post.createdAt,
     mainEntityOfPage: `${siteConfig.url}/post/${post.id}`,
     keywords: ['prediction tracking', 'prediction verification', 'witness record', ...post.tags],
-    about: [
-      {
-        '@type': 'Thing',
-        name: post.sourceName,
-      },
-    ],
+    ...(post.sourceName
+      ? {
+          about: [
+            {
+              '@type': 'Thing',
+              name: post.sourceName,
+            },
+          ],
+        }
+      : {}),
   }
 
   return (
@@ -109,7 +116,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
         {query?.created === '1' ? (
           <Card className='border-emerald-200 bg-emerald-50'>
             <CardContent className='p-4 text-sm text-emerald-800'>
-              Tracking published successfully.
+              Published successfully.
             </CardContent>
           </Card>
         ) : null}
@@ -151,6 +158,7 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
                   media={post.media}
                   predictionContent={post.predictionContent ?? ''}
                   predictionSource={post.sourceName}
+                  postType={post.postType}
                   sourceUrl={post.sourceUrl}
                 />
                 <VerificationVotePanel event={event} postId={post.id} viewer={viewer} />
@@ -170,7 +178,11 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
           </CardHeader>
           <CardContent className='space-y-3 text-sm text-muted-foreground'>
             <p>Use the original source, timing, and verification criteria together when judging this prediction record.</p>
-            <p>Clear context helps the community witness whether a public prediction was real and whether it eventually came true.</p>
+            <p>
+              {post.postType === 'tracking'
+                ? 'Clear context helps the community witness whether a public prediction was real and whether it eventually came true.'
+                : 'Clear context helps the community witness what was predicted, how it should be checked, and whether it eventually came true.'}
+            </p>
             <p>{post.commentCount} comments and {post.verificationEvents.length} verification events are attached to this record.</p>
           </CardContent>
         </Card>

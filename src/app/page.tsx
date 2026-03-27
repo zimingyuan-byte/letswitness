@@ -48,6 +48,14 @@ export default async function Home() {
             <Link className={buttonVariants({ className: 'bg-emerald-500 text-white hover:bg-emerald-400' })} href='/post/create'>
               Create Tracking
             </Link>
+            <Link
+              className={buttonVariants({
+                variant: 'outline',
+                className: 'border-white/30 bg-white/10 text-white hover:bg-white/20',
+              })}
+              href='/prediction/create'>
+              Create Prediction
+            </Link>
           </CardContent>
         </Card>
         <div className='grid gap-4'>
@@ -154,6 +162,9 @@ export default async function Home() {
                     </Link>
                     <Link className={buttonVariants({ variant: 'outline' })} href='/post/create'>
                       Create Tracking
+                    </Link>
+                    <Link className={buttonVariants({ variant: 'outline' })} href='/prediction/create'>
+                      Create Prediction
                     </Link>
                   </div>
                 </>

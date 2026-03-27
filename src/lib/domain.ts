@@ -6,6 +6,8 @@ export type PostStatus =
   | 'partially_fulfilled'
   | 'expired'
 
+export type PostType = 'tracking' | 'prediction'
+
 export type VerificationEventType = 'time_point' | 'event_trigger'
 
 export type VerificationResult =
@@ -84,9 +86,10 @@ export interface NotificationItem {
 
 export interface WitnessPost {
   id: string
+  postType: PostType
   title: string
   description: string
-  sourceName: string
+  sourceName?: string | null
   predictionContent?: string | null
   sourceUrl?: string | null
   status: PostStatus
