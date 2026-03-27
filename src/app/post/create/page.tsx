@@ -4,7 +4,7 @@ import { CreatePredictionShell } from '@/components/shell/create-prediction-shel
 import { getViewerProfile } from '@/lib/data/posts'
 
 export const metadata: Metadata = {
-  title: 'Create Prediction',
+  title: 'Create Tracking',
   robots: {
     index: false,
     follow: false,
@@ -85,7 +85,7 @@ export default async function CreatePostPage({ searchParams }: CreatePostPagePro
   return (
     <div className='mx-auto max-w-3xl space-y-4'>
       <div>
-        <h1 className='text-3xl font-bold tracking-tight'>Create Prediction</h1>
+        <h1 className='text-3xl font-bold tracking-tight'>Create Tracking</h1>
         <p className='text-sm text-muted-foreground'>
           Share the original claim, add supporting context, and define how it should be
           checked later.

@@ -273,7 +273,7 @@ export function CreatePredictionShell({
     <div className='space-y-6'>
       <Card>
         <CardHeader>
-          <CardTitle>Create Prediction</CardTitle>
+          <CardTitle>Create Tracking</CardTitle>
           <CardDescription>
             Publish a claim, add context, and define how it should be verified later.
           </CardDescription>
