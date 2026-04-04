@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CommentThreadShell } from '@/components/feed/comment-thread-shell'
+import { FollowPostButton } from '@/components/feed/follow-post-button'
+import { PostOwnerActions } from '@/components/feed/post-owner-actions'
 import { CredibilityVotePanel } from '@/components/feed/credibility-vote-panel'
 import { StatusPill } from '@/components/feed/status-pill'
 import { VerificationCard } from '@/components/feed/verification-card'
@@ -16,6 +18,9 @@ interface PostDetailPageProps {
   }>
   searchParams?: Promise<{
     created?: string
+    updated?: string
+    savedDraft?: string
+    error?: string
   }>
 }
 
@@ -120,6 +125,34 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
             </CardContent>
           </Card>
         ) : null}
+        {query?.updated === '1' ? (
+          <Card className='border-emerald-200 bg-emerald-50'>
+            <CardContent className='p-4 text-sm text-emerald-800'>
+              Post updated successfully.
+            </CardContent>
+          </Card>
+        ) : null}
+        {query?.error === 'withdraw-failed' ? (
+          <Card className='border-rose-200 bg-rose-50'>
+            <CardContent className='p-4 text-sm text-rose-700'>
+              We could not withdraw this post. Please try again.
+            </CardContent>
+          </Card>
+        ) : null}
+        {query?.error === 'save-draft-failed' ? (
+          <Card className='border-rose-200 bg-rose-50'>
+            <CardContent className='p-4 text-sm text-rose-700'>
+              We could not save this post as draft. Please try again.
+            </CardContent>
+          </Card>
+        ) : null}
+        {query?.savedDraft === '1' ? (
+          <Card className='border-amber-200 bg-amber-50'>
+            <CardContent className='p-4 text-sm text-amber-800'>
+              Saved as draft. This post is now hidden from public lists.
+            </CardContent>
+          </Card>
+        ) : null}
         <Card>
           <CardHeader className='space-y-3'>
             <div className='flex items-start justify-between gap-4'>
@@ -133,6 +166,23 @@ export default async function PostDetailPage({ params, searchParams }: PostDetai
             </div>
           </CardHeader>
           <CardContent className='space-y-4'>
+            {viewer?.id === post.author.id ? (
+              <PostOwnerActions
+                editHref={`/post/${post.id}/edit`}
+                postId={post.id}
+                returnPath={`/post/${post.id}`}
+              />
+            ) : (
+              <FollowPostButton
+                followerCount={post.follow.followerCount}
+                isAuthor={false}
+                isFollowing={post.follow.viewerFollowing}
+                isViewerSignedIn={Boolean(viewer?.id)}
+                postId={post.id}
+                returnPath={`/post/${post.id}`}
+              />
+            )}
+            <p className='text-xs text-muted-foreground'>{post.follow.followerCount} followers</p>
             <p className='leading-7 text-zinc-700'>{post.description}</p>
             <div className='flex flex-wrap gap-2'>
               {post.tags.map((tag) => (

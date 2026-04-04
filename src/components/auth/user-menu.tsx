@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { Bell, LogOut, PlusSquare, UserCircle2 } from 'lucide-react'
+import { Bell, LogOut, UserCircle2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar'
 import {
   DropdownMenu,
@@ -102,18 +102,19 @@ export function UserMenu({ viewer, notifications, unreadCount }: UserMenuProps) 
             {viewer.username ? 'Profile' : 'Finish profile'}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href='/post/create'>
-            <PlusSquare className='mr-2 h-4 w-4' />
-            Create Tracking
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href='/prediction/create'>
-            <PlusSquare className='mr-2 h-4 w-4' />
-            Create Prediction
-          </Link>
-        </DropdownMenuItem>
+        {viewer.username ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href={`/user/${viewer.username}#my-tracking`}>My Tracking</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/user/${viewer.username}#my-prediction`}>My Prediction</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/user/${viewer.username}#my-followed`}>My Followed</Link>
+            </DropdownMenuItem>
+          </>
+        ) : null}
         {!viewer.username ? (
           <DropdownMenuItem asChild>
             <Link href='/onboarding'>Finish profile</Link>

@@ -1,4 +1,5 @@
 export type PostStatus =
+  | 'draft'
   | 'pending'
   | 'verifying'
   | 'fulfilled'
@@ -95,6 +96,10 @@ export interface WitnessPost {
   status: PostStatus
   credibilityScore: number
   credibility: CredibilityVoteSummary
+  follow: {
+    followerCount: number
+    viewerFollowing: boolean
+  }
   commentCount: number
   createdAt: string
   tags: string[]

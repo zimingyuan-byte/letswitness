@@ -101,6 +101,11 @@ interface TriggerConfirmRow {
   user_id: string
 }
 
+interface PostFollowRow {
+  post_id: string
+  user_id: string
+}
+
 interface ExplorePostsOptions {
   searchText?: string
   status?: WitnessPost['status'] | ''
@@ -150,6 +155,10 @@ function filterMockPosts(posts: WitnessPost[], options: ExplorePostsOptions = {}
   const search = normalizeText(options.searchText)
 
   const filtered = posts.filter((post) => {
+    if (post.status === 'draft') {
+      return false
+    }
+
     if (options.status && post.status !== options.status) {
       return false
     }
@@ -217,6 +226,7 @@ async function hydratePosts(
     { data: commentRows },
     { data: mediaRows },
     { data: credibilityVotes },
+    { data: postFollows },
   ] = await Promise.all([
     supabase
       .from(LETSWITNESS_TABLES.profiles)
@@ -242,6 +252,10 @@ async function hydratePosts(
     supabase
       .from(LETSWITNESS_TABLES.credibilityVotes)
       .select('post_id, user_id, value')
+      .in('post_id', postIds),
+    supabase
+      .from(LETSWITNESS_TABLES.postFollows)
+      .select('post_id, user_id')
       .in('post_id', postIds),
   ])
 
@@ -274,6 +288,7 @@ async function hydratePosts(
   const commentCountMap = new Map<string, number>()
   const mediaMap = new Map<string, WitnessPost['media']>()
   const credibilityMap = new Map<string, WitnessPost['credibility']>()
+  const followMap = new Map<string, WitnessPost['follow']>()
   const eventVoteMap = new Map<string, WitnessPost['verificationEvents'][number]['votes']>()
   const eventConfirmMap = new Map<string, { count: number; viewerConfirmed: boolean }>()
   const eventMap = new Map<string, WitnessPost['verificationEvents']>()
@@ -327,6 +342,21 @@ async function hydratePosts(
     }
 
     credibilityMap.set(vote.post_id, current)
+  }
+
+  for (const follow of (postFollows as PostFollowRow[] | null) ?? []) {
+    const current = followMap.get(follow.post_id) ?? {
+      followerCount: 0,
+      viewerFollowing: false,
+    }
+
+    current.followerCount += 1
+
+    if (viewerId && follow.user_id === viewerId) {
+      current.viewerFollowing = true
+    }
+
+    followMap.set(follow.post_id, current)
   }
 
   for (const vote of (verificationVotes as VerificationVoteRow[] | null) ?? []) {
@@ -423,6 +453,10 @@ async function hydratePosts(
       status: post.status,
       credibilityScore: computedScore,
       credibility,
+      follow: followMap.get(post.id) ?? {
+        followerCount: 0,
+        viewerFollowing: false,
+      },
       commentCount: commentCountMap.get(post.id) ?? 0,
       createdAt: post.created_at,
       tags: postTagMap.get(post.id) ?? [],
@@ -478,6 +512,7 @@ async function runExploreQuery(
     let query = supabase
       .from(LETSWITNESS_TABLES.posts)
       .select(selectClause)
+      .neq('status', 'draft')
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -581,8 +616,17 @@ export async function getPostById(id: string): Promise<WitnessPost | null> {
 
   const viewerId = await getViewerId(supabase)
   const posts = await hydratePosts(supabase, [postRow], viewerId)
+  const post = posts[0] ?? null
 
-  return posts[0] ?? null
+  if (!post) {
+    return null
+  }
+
+  if (post.status === 'draft' && post.author.id !== viewerId) {
+    return null
+  }
+
+  return post
 }
 
 export async function getPostComments(postId: string): Promise<PostComment[]> {
@@ -775,6 +819,55 @@ export async function getPostsByUsername(username: string): Promise<WitnessPost[
   }
 
   const viewerId = await getViewerId(supabase)
+  const posts = await hydratePosts(supabase, postRows, viewerId)
 
-  return hydratePosts(supabase, postRows, viewerId)
+  return posts.filter((post) => post.status !== 'draft' || post.author.id === viewerId)
+}
+
+export async function getFollowedPostsByViewer(): Promise<WitnessPost[]> {
+  const supabase = await createServerSupabaseClient()
+
+  if (!supabase) {
+    return []
+  }
+
+  const viewerId = await getViewerId(supabase)
+
+  if (!viewerId) {
+    return []
+  }
+
+  const { data: follows, error: followsError } = await supabase
+    .from(LETSWITNESS_TABLES.postFollows)
+    .select('post_id')
+    .eq('user_id', viewerId)
+
+  if (followsError) {
+    return []
+  }
+
+  const postIds = [...new Set((follows ?? []).map((row) => row.post_id).filter(Boolean))]
+
+  if (!postIds.length) {
+    return []
+  }
+
+  await syncVerificationStates(supabase, postIds)
+
+  const result = await runPostRowQuery(async (selectClause) => {
+    return await supabase
+      .from(LETSWITNESS_TABLES.posts)
+      .select(selectClause)
+      .in('id', postIds)
+      .order('created_at', { ascending: false })
+  })
+
+  const postRows = (result.data as PostRow[] | null) ?? []
+
+  if (result.error) {
+    return []
+  }
+
+  const posts = await hydratePosts(supabase, postRows, viewerId)
+  return posts.filter((post) => post.status !== 'draft')
 }

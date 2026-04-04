@@ -1,6 +1,6 @@
 'use client'
 
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, useRef, useState } from 'react'
+import { type ChangeEvent, type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react'
 import { Info, Upload } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
@@ -58,6 +58,11 @@ interface SelectedTag {
   label: string
 }
 
+interface SelectedImagePreview {
+  name: string
+  url: string
+}
+
 function FieldError({ message }: { message?: string | null }) {
   if (!message) {
     return null
@@ -90,6 +95,7 @@ export function CreateTrackingShell({
   })
   const [currentFieldErrors, setCurrentFieldErrors] = useState<CreateTrackingFieldErrors>(fieldErrors)
   const [selectedFiles, setSelectedFiles] = useState<string[]>([])
+  const [selectedImagePreviews, setSelectedImagePreviews] = useState<SelectedImagePreview[]>([])
   const [selectedTags, setSelectedTags] = useState<SelectedTag[]>(
     values.tags.map((tag) => ({
       value: tag,
@@ -194,7 +200,23 @@ export function CreateTrackingShell({
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files ?? [])
     setSelectedFiles(files.map((file) => file.name))
+    setSelectedImagePreviews((current) => {
+      current.forEach((item) => URL.revokeObjectURL(item.url))
+
+      return files
+        .filter((file) => file.type.startsWith('image/'))
+        .map((file) => ({
+          name: file.name,
+          url: URL.createObjectURL(file),
+        }))
+    })
   }
+
+  useEffect(() => {
+    return () => {
+      selectedImagePreviews.forEach((item) => URL.revokeObjectURL(item.url))
+    }
+  }, [selectedImagePreviews])
 
   function validateForm() {
     const nextErrors: CreateTrackingFieldErrors = {
@@ -213,42 +235,34 @@ export function CreateTrackingShell({
     const predictionContent = formValues.predictionContent.trim()
     const sourceUrl = formValues.sourceUrl.trim()
     const description = formValues.description.trim()
-    const verificationStandards = formValues.verificationStandards.trim()
 
-    if (title.length < 8 || title.length > 120) {
-      nextErrors.title = 'Use 8-120 characters and summarize the claim in one clear sentence.'
+    if (!title) {
+      nextErrors.title = 'Enter a title.'
     }
 
-    if (sourceName.length < 2 || sourceName.length > 120) {
+    if (!sourceName) {
       nextErrors.sourceName = 'Enter the person or organization that made the prediction.'
     } else if (/^https?:\/\//i.test(sourceName)) {
       nextErrors.sourceName =
         'Enter the speaker or organization name here, not a URL. Put links in the Link field instead.'
     }
 
-    if (predictionContent.length < 8 || predictionContent.length > 280) {
-      nextErrors.predictionContent =
-        'Summarize the prediction itself in 8-280 characters using one short, clear statement.'
+    if (!predictionContent) {
+      nextErrors.predictionContent = 'Enter the prediction content.'
     }
 
     if (sourceUrl && !/^https?:\/\/.+/i.test(sourceUrl)) {
       nextErrors.sourceUrl = 'Enter a full URL starting with http:// or https://.'
     }
 
-    if (description.length < 30 || description.length > 5000) {
-      nextErrors.description =
-        'Add at least 30 characters of context, including what was said, when, and why it matters.'
+    if (!description) {
+      nextErrors.description = 'Enter a description.'
     }
 
     if (!selectedTags.length) {
       nextErrors.tags = 'Choose or add at least one tag so readers can discover the prediction.'
     } else if (selectedTags.length > 5) {
       nextErrors.tags = 'Choose or add up to 5 tags in total.'
-    }
-
-    if (verificationStandards.length < 5 || verificationStandards.length > 500) {
-      nextErrors.verificationStandards =
-        'Explain what outcome should happen so other users can verify this prediction fairly.'
     }
 
     if (!formValues.verificationDeadline) {
@@ -301,7 +315,7 @@ export function CreateTrackingShell({
                   id='title'
                   name='title'
                   onChange={(event) => updateField('title', event.target.value)}
-                  placeholder='Summarize the prediction in 120 characters or less'
+                  placeholder='Enter a clear title for this tracking record'
                   required
                   value={formValues.title}
                 />
@@ -394,7 +408,7 @@ export function CreateTrackingShell({
 
               <div className='space-y-2'>
                 <Label className={cn(currentFieldErrors.sourceName ? 'text-rose-700' : undefined)} htmlFor='sourceName'>
-                  Prediction Source
+                  Who made this prediction?
                 </Label>
                 <Input
                   className={getFieldClassName(Boolean(currentFieldErrors.sourceName))}
@@ -412,7 +426,7 @@ export function CreateTrackingShell({
                 <Label
                   className={cn(currentFieldErrors.predictionContent ? 'text-rose-700' : undefined)}
                   htmlFor='predictionContent'>
-                  Prediction Content
+                  What is his/her/their prediction?
                 </Label>
                 <Textarea
                   className={getFieldClassName(Boolean(currentFieldErrors.predictionContent))}
@@ -430,7 +444,7 @@ export function CreateTrackingShell({
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='mediaFiles'>Evidence Media</Label>
+                <Label htmlFor='mediaFiles'>Media</Label>
                 <input
                   accept='image/*,audio/*,video/*'
                   className='sr-only'
@@ -457,6 +471,20 @@ export function CreateTrackingShell({
                     {selectedFiles.join(', ')}
                   </div>
                 ) : null}
+                {selectedImagePreviews.length ? (
+                  <div className='grid grid-cols-2 gap-3 sm:grid-cols-3'>
+                    {selectedImagePreviews.map((preview) => (
+                      <div key={preview.url} className='overflow-hidden rounded-md border bg-white'>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={preview.name}
+                          className='h-24 w-full object-cover'
+                          src={preview.url}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
                 <p className='text-xs text-muted-foreground'>
                   Up to 5 files total. Images up to 10MB, audio up to 50MB, and video up to
                   200MB.
@@ -465,7 +493,7 @@ export function CreateTrackingShell({
 
               <div className='space-y-2'>
                 <Label className={cn(currentFieldErrors.sourceUrl ? 'text-rose-700' : undefined)} htmlFor='sourceUrl'>
-                  Source Link (Optional)
+                  Link (Optional)
                 </Label>
                 <Input
                   className={getFieldClassName(Boolean(currentFieldErrors.sourceUrl))}
@@ -487,7 +515,7 @@ export function CreateTrackingShell({
                   <Label
                     className={cn(currentFieldErrors.verificationStandards ? 'text-rose-700' : undefined)}
                     htmlFor='verificationStandards'>
-                    Verification Standards
+                    What milestones indicate the success of this prediction? (Optional)
                   </Label>
                   <Textarea
                     className={getFieldClassName(Boolean(currentFieldErrors.verificationStandards))}
@@ -495,7 +523,6 @@ export function CreateTrackingShell({
                     name='verificationStandards'
                     onChange={(event) => updateField('verificationStandards', event.target.value)}
                     placeholder='Explain exactly what outcome, benchmark, or condition will count as verified.'
-                    required
                     value={formValues.verificationStandards}
                   />
                   <FieldError message={currentFieldErrors.verificationStandards} />
@@ -505,7 +532,7 @@ export function CreateTrackingShell({
                   <Label
                     className={cn(currentFieldErrors.verificationDeadline ? 'text-rose-700' : undefined)}
                     htmlFor='verificationDeadline'>
-                    Verification Deadline
+                    Deadline
                   </Label>
                   <Input
                     className={getFieldClassName(Boolean(currentFieldErrors.verificationDeadline))}

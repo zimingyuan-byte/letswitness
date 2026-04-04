@@ -1,16 +1,18 @@
 import Link from 'next/link'
 import { ArrowUpRight, MessageSquare } from 'lucide-react'
-import type { WitnessPost } from '@/lib/domain'
+import type { ViewerProfile, WitnessPost } from '@/lib/domain'
 import { formatTimeToNow } from '@/lib/utils'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
+import { FollowPostButton } from '@/components/feed/follow-post-button'
 import { VoteMeter } from '@/components/feed/vote-meter'
 import { StatusPill } from '@/components/feed/status-pill'
 
 interface PostCardProps {
   post: WitnessPost
+  viewer: ViewerProfile | null
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, viewer }: PostCardProps) {
   const metaPrefix =
     post.postType === 'tracking' && post.sourceName
       ? `Source: ${post.sourceName}`
@@ -71,13 +73,24 @@ export function PostCard({ post }: PostCardProps) {
               {post.commentCount} comments
             </span>
             <span>{post.verificationEvents.length} verification events</span>
+            <span>{post.follow.followerCount} followers</span>
           </div>
-          <Link
-            className='inline-flex items-center gap-1 text-sm font-medium text-zinc-900 hover:text-zinc-700'
-            href={`/post/${post.id}`}>
-            View details
-            <ArrowUpRight className='h-4 w-4' />
-          </Link>
+          <div className='flex items-center gap-2'>
+            <FollowPostButton
+              followerCount={post.follow.followerCount}
+              isAuthor={viewer?.id === post.author.id}
+              isFollowing={post.follow.viewerFollowing}
+              isViewerSignedIn={Boolean(viewer?.id)}
+              postId={post.id}
+              returnPath={`/post/${post.id}`}
+            />
+            <Link
+              className='inline-flex items-center gap-1 text-sm font-medium text-zinc-900 hover:text-zinc-700'
+              href={`/post/${post.id}`}>
+              View details
+              <ArrowUpRight className='h-4 w-4' />
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     </article>

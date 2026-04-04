@@ -10,4 +10,5 @@ export const LETSWITNESS_TABLES = {
   eventTriggerConfirms: 'letswitness_event_trigger_confirms',
   comments: 'letswitness_comments',
   notifications: 'letswitness_notifications',
+  postFollows: 'letswitness_post_follows',
 } as const

@@ -126,41 +126,36 @@ function getPostFieldErrors(formData: FormData, mode: PostType) {
 
   return {
     title:
-      title.length < 8 || title.length > 120
-        ? 'Use 8-120 characters and summarize the claim in one clear sentence.'
+      !title
+        ? 'Enter a title.'
         : undefined,
     sourceName:
       mode !== 'tracking'
         ? undefined
-        : sourceName.length < 2 || sourceName.length > 120
+        : !sourceName
           ? 'Enter the person or organization that made the prediction.'
           : /^https?:\/\//i.test(sourceName)
             ? 'Enter the speaker or organization name here, not a URL. Put links in the Link field instead.'
             : undefined,
     predictionContent:
-      predictionContent.length < 8 || predictionContent.length > 280
-        ? 'Summarize the prediction itself in 8-280 characters using one short, clear statement.'
+      !predictionContent
+        ? 'Enter the prediction content.'
         : undefined,
     sourceUrl:
       sourceUrl && !/^https?:\/\/.+/i.test(sourceUrl)
         ? 'Enter a full URL starting with http:// or https://.'
         : undefined,
     description:
-      description.length < 30 || description.length > 5000
-        ? 'Add at least 30 characters of context, including what was said, when, and why it matters.'
+      !description
+        ? 'Enter a description.'
         : undefined,
   } satisfies Partial<Record<CreateFormField, string>>
 }
 
 function getVerificationFieldErrors(formData: FormData) {
-  const verificationStandards = getStringValue(formData, 'verificationStandards').trim()
   const verificationDeadline = getStringValue(formData, 'verificationDeadline').trim()
 
   return {
-    verificationStandards:
-      verificationStandards.length < 5 || verificationStandards.length > 500
-        ? 'Explain what outcome should happen so other users can verify this prediction fairly.'
-        : undefined,
     verificationDeadline:
       !verificationDeadline
         ? 'Choose the date when this prediction should be checked.'

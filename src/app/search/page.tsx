@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/Input'
 import { siteConfig } from '@/config'
 import type { PostStatus } from '@/lib/domain'
-import { getExplorePosts } from '@/lib/data/posts'
+import { getExplorePosts, getViewerProfile } from '@/lib/data/posts'
 
 interface SearchPageProps {
   searchParams?: Promise<{
@@ -78,14 +78,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     ? (status as PostStatus)
     : undefined
 
-  const results = await getExplorePosts({
-    searchText: query || undefined,
-    status: normalizedStatus,
-    source: source || undefined,
-    tag: tag || undefined,
-    sort,
-    limit: query || status || source || tag ? 50 : 8,
-  })
+  const [results, viewer] = await Promise.all([
+    getExplorePosts({
+      searchText: query || undefined,
+      status: normalizedStatus,
+      source: source || undefined,
+      tag: tag || undefined,
+      sort,
+      limit: query || status || source || tag ? 50 : 8,
+    }),
+    getViewerProfile(),
+  ])
 
   return (
     <div className='space-y-6'>
@@ -150,7 +153,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           {results.length ? (
             <div className='space-y-4'>
               {results.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} viewer={viewer} />
               ))}
             </div>
           ) : (

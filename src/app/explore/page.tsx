@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { siteConfig } from '@/config'
 import type { PostStatus } from '@/lib/domain'
-import { getExplorePosts } from '@/lib/data/posts'
+import { getExplorePosts, getViewerProfile } from '@/lib/data/posts'
 
 export const metadata: Metadata = {
   title: 'Explore Prediction Tracking Records',
@@ -55,13 +55,16 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
     ? (status as PostStatus)
     : undefined
 
-  const posts = await getExplorePosts({
-    status: normalizedStatus,
-    source: source || undefined,
-    tag: tag || undefined,
-    sort,
-    limit: 50,
-  })
+  const [posts, viewer] = await Promise.all([
+    getExplorePosts({
+      status: normalizedStatus,
+      source: source || undefined,
+      tag: tag || undefined,
+      sort,
+      limit: 50,
+    }),
+    getViewerProfile(),
+  ])
 
   return (
     <div className='grid gap-6 lg:grid-cols-[1.1fr_0.9fr]'>
@@ -110,7 +113,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         </form>
         <div className='space-y-4'>
           {posts.length ? (
-            posts.map((post) => <PostCard key={post.id} post={post} />)
+            posts.map((post) => <PostCard key={post.id} post={post} viewer={viewer} />)
           ) : (
             <Card>
               <CardContent className='p-6 text-sm text-muted-foreground'>

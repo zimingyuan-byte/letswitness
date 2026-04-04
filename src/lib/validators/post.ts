@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const postStatusSchema = z.enum([
+  'draft',
   'pending',
   'verifying',
   'fulfilled',
@@ -17,13 +18,12 @@ export const postTagSchema = z
   .regex(/^[a-z0-9-]+$/i, 'Tags can contain letters, numbers, and hyphens only.')
 
 const createBasePostSchema = z.object({
-  title: z.string().trim().min(8).max(120),
-  description: z.string().trim().min(30).max(5000),
-  predictionContent: z.string().trim().min(8).max(280),
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  predictionContent: z.string().trim().min(1),
   sourceUrl: z
     .string()
     .trim()
-    .max(500)
     .refine((value) => !value || /^https?:\/\/.+/i.test(value), {
       message: 'Source link must start with http:// or https://.',
     }),
@@ -31,7 +31,7 @@ const createBasePostSchema = z.object({
 })
 
 export const createTrackingSchema = createBasePostSchema.extend({
-  sourceName: z.string().trim().min(2).max(120),
+  sourceName: z.string().trim().min(1),
 })
 
 export const createPredictionSchema = createBasePostSchema

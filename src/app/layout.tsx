@@ -57,7 +57,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <Providers>
           <Navbar />
-          <div className='container mx-auto max-w-7xl py-8'>
+          <div className='container mx-auto max-w-[90rem] py-8'>
             {children}
           </div>
         </Providers>

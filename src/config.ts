@@ -19,7 +19,5 @@ export const siteConfig = {
     { href: '/', label: 'Home' },
     { href: '/explore', label: 'Explore' },
     { href: '/search', label: 'Search' },
-    { href: '/post/create', label: 'Create Tracking' },
-    { href: '/prediction/create', label: 'Create Prediction' },
   ],
 }

@@ -32,7 +32,7 @@ export function VerificationCard({
   sourceUrl,
   media,
 }: VerificationCardProps) {
-  const linkLabel = postType === 'tracking' ? 'Prediction Link' : 'Link'
+  const linkLabel = 'link'
 
   return (
     <Card>
@@ -44,14 +44,14 @@ export function VerificationCard({
           <div className='space-y-3'>
             {postType === 'tracking' && predictionSource ? (
               <p>
-                <span className='text-zinc-400'>Prediction Source:</span>{' '}
+                <span className='text-zinc-400'>Who:</span>{' '}
                 <span className='font-semibold text-zinc-950'>{predictionSource}</span>
               </p>
             ) : null}
-            <p>
-              <span className='text-zinc-400'>Prediction Content:</span>{' '}
-              <span className='font-semibold text-zinc-950'>{predictionContent}</span>
-            </p>
+            <div>
+              <p className='text-zinc-400'>Prediction</p>
+              <p className='mt-2 font-semibold text-zinc-950'>{predictionContent}</p>
+            </div>
             {sourceUrl ? (
               <p>
                 <span className='text-zinc-400'>{linkLabel}:</span>{' '}
@@ -103,7 +103,7 @@ export function VerificationCard({
         </div>
 
         <div className='rounded-xl border border-sky-200 bg-sky-50/70 p-4'>
-          <p className='text-zinc-400'>Verification Standards</p>
+          <p className='text-zinc-400'>Milestones</p>
           <p className='mt-2 font-semibold text-zinc-950'>{event.description}</p>
         </div>
 
@@ -111,7 +111,7 @@ export function VerificationCard({
           <div className='space-y-3'>
             {event.targetDate ? (
               <p>
-                <span className='text-zinc-400'>Verification Deadline:</span>{' '}
+                <span className='text-zinc-400'>Deadline:</span>{' '}
                 <span className='text-zinc-950'>{event.targetDate}</span>
               </p>
             ) : null}
@@ -146,7 +146,7 @@ export function VerificationCard({
               </p>
             ) : null}
             <p>
-              <span className='text-zinc-400'>Verification Votes:</span>{' '}
+              <span className='text-zinc-400'>Votes:</span>{' '}
               <span className='text-zinc-950'>{event.votes.totalVotes}</span>
             </p>
             <p>

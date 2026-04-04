@@ -42,7 +42,7 @@ const errorMessages: Record<string, string> = {
   'invalid-tags': 'Tags must use letters, numbers, or hyphens only, with up to 5 tags total.',
   'invalid-media': 'Please upload up to 5 valid image, audio, or video files within the size limits.',
   'invalid-post': 'Please review the highlighted fields before publishing.',
-  'invalid-event': 'Please provide valid verification standards and a verification deadline.',
+  'invalid-event': 'Please provide a valid verification deadline.',
   'create-post-failed': 'Your tracking record could not be published. Please try again.',
   'create-related-records-failed': 'We could not save all tracking details. Please try again.',
 }

@@ -25,6 +25,10 @@ export const mockPosts: WitnessPost[] = [
       totalVotes: 22,
       viewerValue: null,
     },
+    follow: {
+      followerCount: 3,
+      viewerFollowing: false,
+    },
     commentCount: 14,
     createdAt: '2026-03-01T12:30:00.000Z',
     tags: ['finance', 'ai', 'markets'],
@@ -71,6 +75,10 @@ export const mockPosts: WitnessPost[] = [
       totalVotes: 25,
       viewerValue: null,
     },
+    follow: {
+      followerCount: 8,
+      viewerFollowing: false,
+    },
     commentCount: 27,
     createdAt: '2026-02-10T09:15:00.000Z',
     tags: ['politics', 'policy'],
@@ -116,6 +124,10 @@ export const mockPosts: WitnessPost[] = [
       downvotes: 3,
       totalVotes: 33,
       viewerValue: null,
+    },
+    follow: {
+      followerCount: 5,
+      viewerFollowing: false,
     },
     commentCount: 9,
     createdAt: '2025-11-18T18:40:00.000Z',

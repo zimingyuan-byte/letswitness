@@ -2,6 +2,7 @@ import type { PostStatus } from '@/lib/domain'
 import { cn } from '@/lib/utils'
 
 const statusLabels: Record<PostStatus, string> = {
+  draft: 'Draft',
   pending: 'Pending',
   verifying: 'Verifying',
   fulfilled: 'Fulfilled',
@@ -11,6 +12,7 @@ const statusLabels: Record<PostStatus, string> = {
 }
 
 const statusClasses: Record<PostStatus, string> = {
+  draft: 'bg-zinc-100 text-zinc-700 ring-zinc-200',
   pending: 'bg-sky-50 text-sky-700 ring-sky-200',
   verifying: 'bg-amber-50 text-amber-700 ring-amber-200',
   fulfilled: 'bg-emerald-50 text-emerald-700 ring-emerald-200',

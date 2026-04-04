@@ -117,7 +117,7 @@ export default async function Home() {
           </div>
           <div className='space-y-4'>
             {posts.length ? (
-              posts.map((post) => <PostCard key={post.id} post={post} />)
+              posts.map((post) => <PostCard key={post.id} post={post} viewer={viewer} />)
             ) : (
               <Card>
                 <CardContent className='p-6 text-sm text-muted-foreground'>
@@ -146,7 +146,7 @@ export default async function Home() {
               <CardTitle className='text-lg'>Your account</CardTitle>
               <CardDescription>
                 {viewer
-                  ? 'You are signed in and can continue with profile setup or content creation.'
+                  ? 'Jump directly into your personal dashboard sections.'
                   : 'Sign in to finish onboarding and start creating prediction records.'}
               </CardDescription>
             </CardHeader>
@@ -156,17 +156,23 @@ export default async function Home() {
                   <p className='text-sm text-muted-foreground'>
                     Signed in as {viewer.email ?? viewer.displayName ?? 'viewer'}.
                   </p>
-                  <div className='flex flex-wrap gap-3'>
-                    <Link className={buttonVariants()} href={viewer.username ? `/user/${viewer.username}` : '/onboarding'}>
-                      {viewer.username ? 'Open profile' : 'Finish profile'}
+                  {viewer.username ? (
+                    <div className='grid gap-2 sm:grid-cols-2'>
+                      <Link className={buttonVariants({ variant: 'outline' })} href={`/user/${viewer.username}#my-tracking`}>
+                        My Tracking
+                      </Link>
+                      <Link className={buttonVariants({ variant: 'outline' })} href={`/user/${viewer.username}#my-prediction`}>
+                        My Prediction
+                      </Link>
+                      <Link className={buttonVariants({ variant: 'outline', className: 'sm:col-span-2' })} href={`/user/${viewer.username}#my-followed`}>
+                        My Followed
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link className={buttonVariants()} href='/onboarding'>
+                      Finish profile
                     </Link>
-                    <Link className={buttonVariants({ variant: 'outline' })} href='/post/create'>
-                      Create Tracking
-                    </Link>
-                    <Link className={buttonVariants({ variant: 'outline' })} href='/prediction/create'>
-                      Create Prediction
-                    </Link>
-                  </div>
+                  )}
                 </>
               ) : (
                 <Link className={buttonVariants()} href='/login'>
