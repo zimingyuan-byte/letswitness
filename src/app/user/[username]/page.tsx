@@ -43,6 +43,10 @@ export async function generateMetadata({
   return {
     title: `${displayName} | Prediction Contributor`,
     description,
+    robots: {
+      index: false,
+      follow: false,
+    },
     keywords: [
       ...siteConfig.keywords,
       profile.username,

@@ -34,24 +34,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  const seenUsers = new Set<string>()
-  const userRoutes: MetadataRoute.Sitemap = []
-
-  for (const post of posts) {
-    const username = post.author.username
-
-    if (!username || seenUsers.has(username)) {
-      continue
-    }
-
-    seenUsers.add(username)
-    userRoutes.push({
-      url: `${siteConfig.url}/user/${username}`,
-      lastModified: new Date(post.createdAt),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    })
-  }
-
-  return [...staticRoutes, ...postRoutes, ...userRoutes]
+  return [...staticRoutes, ...postRoutes]
 }
